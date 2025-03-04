@@ -101,4 +101,29 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });
+
+  app.patch("/api/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const existingUser = await storage.getUserByUsername(req.body.username);
+    if (existingUser && existingUser.id !== req.user?.id) {
+      return res.status(400).send("Username already exists");
+    }
+
+    const updatedUser = await storage.updateUser(req.user?.id, req.body);
+    req.logIn(updatedUser, (err) => {
+      if (err) return res.status(500).json({ message: err.message });
+      res.json(updatedUser);
+    });
+  });
+
+  app.delete("/api/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    await storage.deleteUser(req.user?.id);
+    req.logout((err) => {
+      if (err) return res.status(500).json({ message: err.message });
+      res.sendStatus(200);
+    });
+  });
 }
