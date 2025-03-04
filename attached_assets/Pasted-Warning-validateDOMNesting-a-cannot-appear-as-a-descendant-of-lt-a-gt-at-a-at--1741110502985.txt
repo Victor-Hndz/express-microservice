@@ -1,0 +1,31 @@
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at a
+    at https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=66f08a2f:337:18
+    at div
+    at div
+    at nav
+    at MotionComponent (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=66f08a2f:945:40)
+    at Navbar (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/src/components/navbar.tsx:25:36)
+    at div
+    at Router
+    at AuthProvider (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/src/hooks/use-auth.tsx:26:32)
+    at QueryClientProvider (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=66f08a2f:2805:3)
+    at App
+at a
+at a
+at https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=66f08a2f:337:18
+at div
+at div
+at nav
+at MotionComponent (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=66f08a2f:945:40)
+at Navbar (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/src/components/navbar.tsx:25:36)
+at div
+at Router
+at AuthProvider (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/src/hooks/use-auth.tsx:26:32)
+at QueryClientProvider (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=66f08a2f:2805:3)
+at App
+at t.value (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6be0c832-953d-4799-bd07-815f3157a451-00-26wh3nthwphor.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

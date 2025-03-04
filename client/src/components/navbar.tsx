@@ -15,12 +15,13 @@ export function Navbar() {
     >
       <div className="container flex h-16 items-center px-4">
         <div className="mr-4 hidden md:flex">
-          <Link href="/">
-            <a className="mr-6 flex items-center space-x-2">
-              <span className="hidden font-bold sm:inline-block">
-                NestJS DDD App
-              </span>
-            </a>
+          <Link 
+            href="/" 
+            className="mr-6 flex items-center space-x-2"
+          >
+            <span className="hidden font-bold sm:inline-block">
+              NestJS DDD App
+            </span>
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
