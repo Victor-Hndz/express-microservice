@@ -18,13 +18,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { User, Send, RefreshCw } from "lucide-react";
+import { User, Send, RefreshCw, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRequestSchema } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ export default function HomePage() {
   const form = useForm({
     resolver: zodResolver(insertRequestSchema),
     defaultValues: {
-      variable: "geopotential",
+      variable: undefined,
       outDir: "",
       debug: false,
     },
@@ -47,11 +48,13 @@ export default function HomePage() {
     onSuccess: () => {
       toast({
         title: "Request submitted",
-        description: user 
-          ? "Your request has been saved and will be processed."
-          : "Your request has been submitted.",
+        description: "Your request has been saved and will be processed.",
       });
-      form.reset();
+      form.reset({
+        variable: undefined,
+        outDir: "",
+        debug: false,
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -66,6 +69,27 @@ export default function HomePage() {
     submitMutation.mutate(data);
   });
 
+  if (!user) {
+    return (
+      <div className="container mx-auto p-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Request System</h2>
+            <p className="text-muted-foreground mb-6">
+              Please log in to submit requests.
+            </p>
+            <Button asChild>
+              <Link href="/auth">
+                <LogIn className="h-4 w-4 mr-2" />
+                Login to Continue
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-8">
       <Card className="max-w-2xl mx-auto">
@@ -73,12 +97,10 @@ export default function HomePage() {
           <CardTitle className="text-2xl font-bold">Submit Request</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {user && (
-            <div className="flex items-center gap-3 text-muted-foreground mb-6">
-              <User className="h-5 w-5" />
-              <span>Welcome back, {user.username}!</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3 text-muted-foreground mb-6">
+            <User className="h-5 w-5" />
+            <span>Welcome back, {user.username}!</span>
+          </div>
 
           <Form {...form}>
             <form onSubmit={onSubmit} className="space-y-6">
@@ -94,7 +116,7 @@ export default function HomePage() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a variable" />
+                          <SelectValue placeholder="Choose a variable..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -112,7 +134,7 @@ export default function HomePage() {
                 name="outDir"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Output Directory</FormLabel>
+                    <FormLabel>Output Directory (Optional)</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="/path/to/output" />
                     </FormControl>
@@ -151,7 +173,11 @@ export default function HomePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => form.reset()}
+                  onClick={() => form.reset({
+                    variable: undefined,
+                    outDir: "",
+                    debug: false,
+                  })}
                   disabled={submitMutation.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />

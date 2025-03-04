@@ -11,7 +11,7 @@ export const users = pgTable("users", {
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
   variable: text("variable").notNull(),
-  outDir: text("out_dir").notNull(),
+  outDir: text("out_dir"),
   debug: boolean("debug").notNull(),
   userId: integer("user_id").references(() => users.id),
 });
@@ -36,7 +36,7 @@ export const insertRequestSchema = createInsertSchema(requests)
     variable: z.enum(["geopotential", "temperature"], {
       required_error: "Variable is required",
     }),
-    outDir: z.string().min(1, "Output directory is required"),
+    outDir: z.string().optional(),
     debug: z.boolean().default(false),
   });
 
