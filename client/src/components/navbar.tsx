@@ -20,7 +20,7 @@ export function Navbar() {
             className="mr-6 flex items-center space-x-2"
           >
             <span className="hidden font-bold sm:inline-block">
-              NestJS DDD App
+              Express Microservice App
             </span>
           </Link>
         </div>

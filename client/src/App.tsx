@@ -15,7 +15,7 @@ function Router() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <Switch>
-        <ProtectedRoute path="/" component={HomePage} />
+        <Route path="/" component={HomePage} />
         <ProtectedRoute path="/profile" component={ProfilePage} />
         <Route path="/auth" component={AuthPage} />
         <Route component={NotFound} />

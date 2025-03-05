@@ -2,6 +2,17 @@ import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+/**
+ * Enums
+ */
+export enum Variable {
+  Geopotential = "geopotential",
+  Temperature = "temperature",
+}
+
+/**
+ * Database Schema
+ */
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -16,6 +27,9 @@ export const requests = pgTable("requests", {
   userId: integer("user_id").references(() => users.id),
 });
 
+/**
+ * Validation Schemas
+ */
 export const insertUserSchema = createInsertSchema(users)
   .pick({
     username: true,
@@ -33,14 +47,22 @@ export const insertRequestSchema = createInsertSchema(requests)
     debug: true,
   })
   .extend({
-    variable: z.enum(["geopotential", "temperature"], {
+    variable: z.enum([Variable.Geopotential, Variable.Temperature], {
       required_error: "Variable is required",
     }),
     outDir: z.string().optional(),
     debug: z.boolean().default(false),
   });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
+/**
+ * Database Entity Types
+ */
 export type User = typeof users.$inferSelect;
-export type InsertRequest = z.infer<typeof insertRequestSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Request = typeof requests.$inferSelect;
+export type InsertRequest = z.infer<typeof insertRequestSchema>;
+
+/**
+ * Form Types
+ */
+export type FormValues = z.infer<typeof insertRequestSchema>;

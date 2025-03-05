@@ -36,7 +36,7 @@ export default function ProfilePage() {
   const form = useForm({
     resolver: zodResolver(insertUserSchema.pick({ username: true })),
     defaultValues: {
-      username: user?.username || "",
+      username: user?.username ?? "",
     },
   });
 
@@ -134,10 +134,10 @@ export default function ProfilePage() {
           ) : (
             <div className="grid gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">
+                <label htmlFor="username" className="text-sm font-medium text-muted-foreground">
                   Username
                 </label>
-                <p className="text-lg">{user?.username}</p>
+                <p id="username" className="text-lg">{user?.username}</p>
               </div>
             </div>
           )}
