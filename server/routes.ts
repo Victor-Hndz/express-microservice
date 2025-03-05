@@ -34,8 +34,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.sendStatus(401);
     }
 
-    storage.getUserRequests(req.user.id)
-      .then(requests => res.json(requests))
+    storage
+      .getUserRequests(req.user.id)
+      .then((requests) => res.json(requests))
       .catch(() => res.status(500).json({ message: "Failed to fetch requests" }));
   });
 

@@ -59,17 +59,19 @@ export default function AuthPage() {
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid grid-cols-2 w-full mb-8">
-                <TabsTrigger value="login" className="text-lg">Login</TabsTrigger>
-                <TabsTrigger value="register" className="text-lg">Register</TabsTrigger>
+                <TabsTrigger value="login" className="text-lg">
+                  Login
+                </TabsTrigger>
+                <TabsTrigger value="register" className="text-lg">
+                  Register
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <motion.div {...slideAnimation}>
                   <Form {...loginForm}>
                     <form
-                      onSubmit={loginForm.handleSubmit((data) =>
-                        loginMutation.mutate(data),
-                      )}
+                      onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}
                       className="space-y-6"
                     >
                       <FormField
@@ -124,9 +126,7 @@ export default function AuthPage() {
                 <motion.div {...slideAnimation}>
                   <Form {...registerForm}>
                     <form
-                      onSubmit={registerForm.handleSubmit((data) =>
-                        registerMutation.mutate(data),
-                      )}
+                      onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))}
                       className="space-y-6"
                     >
                       <FormField
@@ -181,7 +181,7 @@ export default function AuthPage() {
         </Card>
       </div>
       <div className="hidden lg:flex flex-col justify-center bg-primary/5 p-12">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -194,8 +194,8 @@ export default function AuthPage() {
             Secure Authentication
           </h1>
           <p className="text-xl leading-relaxed text-muted-foreground">
-            Welcome to our secure authentication system. Login or register to access
-            your personalized dashboard and manage your requests efficiently.
+            Welcome to our secure authentication system. Login or register to access your
+            personalized dashboard and manage your requests efficiently.
           </p>
         </motion.div>
       </div>

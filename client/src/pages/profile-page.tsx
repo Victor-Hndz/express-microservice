@@ -62,11 +62,7 @@ export default function ProfilePage() {
               Profile
             </CardTitle>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
                 <Edit2 className="h-4 w-4 mr-2" />
                 {isEditing ? "Cancel" : "Edit"}
               </Button>
@@ -81,8 +77,8 @@ export default function ProfilePage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your
-                      account and remove all your data.
+                      This action cannot be undone. This will permanently delete your account and
+                      remove all your data.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -120,10 +116,7 @@ export default function ProfilePage() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  disabled={updateProfileMutation.isPending}
-                >
+                <Button type="submit" disabled={updateProfileMutation.isPending}>
                   {updateProfileMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
@@ -137,7 +130,9 @@ export default function ProfilePage() {
                 <label htmlFor="username" className="text-sm font-medium text-muted-foreground">
                   Username
                 </label>
-                <p id="username" className="text-lg">{user?.username}</p>
+                <p id="username" className="text-lg">
+                  {user?.username}
+                </p>
               </div>
             </div>
           )}

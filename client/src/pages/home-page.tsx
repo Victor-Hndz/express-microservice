@@ -64,9 +64,7 @@ export default function HomePage() {
     },
   });
 
-  const onSubmit = form.handleSubmit((data: FormValues) =>
-    submitMutation.mutate(data)
-  );
+  const onSubmit = form.handleSubmit((data: FormValues) => submitMutation.mutate(data));
 
   return (
     <div className="container mx-auto p-8">
@@ -92,22 +90,15 @@ export default function HomePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Variable</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Choose a variable..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={Variable.Geopotential}>
-                          Geopotential
-                        </SelectItem>
-                        <SelectItem value={Variable.Temperature}>
-                          Temperature
-                        </SelectItem>
+                        <SelectItem value={Variable.Geopotential}>Geopotential</SelectItem>
+                        <SelectItem value={Variable.Temperature}>Temperature</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -135,10 +126,7 @@ export default function HomePage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Enable Debug Mode</FormLabel>
@@ -148,11 +136,7 @@ export default function HomePage() {
               />
 
               <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={submitMutation.isPending}
-                >
+                <Button type="submit" className="flex-1" disabled={submitMutation.isPending}>
                   <Send className="h-4 w-4 mr-2" />
                   Submit Request
                 </Button>

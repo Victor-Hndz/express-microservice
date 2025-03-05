@@ -1,4 +1,11 @@
-import { users, requests, type User, type InsertUser, type Request, type InsertRequest } from "@shared/schema";
+import {
+  users,
+  requests,
+  type User,
+  type InsertUser,
+  type Request,
+  type InsertRequest,
+} from "@shared/schema";
 import { eq } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -38,19 +45,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async updateUser(id: number, updateData: Partial<InsertUser>): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, id))
-      .returning();
+    const [user] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
     return user;
   }
 
@@ -59,10 +59,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRequest(request: InsertRequest & { userId?: number }): Promise<Request> {
-    const [createdRequest] = await db
-      .insert(requests)
-      .values(request)
-      .returning();
+    const [createdRequest] = await db.insert(requests).values(request).returning();
     return createdRequest;
   }
 
