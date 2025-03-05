@@ -28,4 +28,17 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
   },
+  server: {
+    host: '0.0.0.0',
+    hmr: {
+      clientPort: 443,
+      host: '0.0.0.0'
+    },
+    watch: {
+      usePolling: true
+    },
+    cors: true,
+    strictPort: true,
+    port: 5173,
+  },
 });
