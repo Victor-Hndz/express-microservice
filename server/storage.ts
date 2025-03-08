@@ -78,19 +78,33 @@ export class DatabaseStorage implements IStorage {
       .where(eq(requests.userId, userId))
       .orderBy(desc(requests.createdAt));
 
-    // Filter out duplicate requests (same variable, outDir, and debug settings)
-    const uniqueRequests = allRequests.reduce((acc: Request[], current: Request) => {
-      const isDuplicate = acc.some(request => 
+    // Create a map to store counts of duplicate requests
+    const requestCounts = new Map<string, number>();
+    const uniqueRequests: (Request & { count: number })[] = [];
+
+    // Group requests and count duplicates
+    allRequests.forEach(request => {
+      const key = `${request.variable}-${request.outDir}-${request.debug}`;
+      requestCounts.set(key, (requestCounts.get(key) || 0) + 1);
+    });
+
+    // Filter duplicates and add counts
+    allRequests.reduce((acc: (Request & { count: number })[], current: Request) => {
+      const key = `${current.variable}-${current.outDir}-${current.debug}`;
+      const isDuplicate = acc.some(request =>
         request.variable === current.variable &&
         request.outDir === current.outDir &&
         request.debug === current.debug
       );
 
       if (!isDuplicate) {
-        acc.push(current);
+        acc.push({
+          ...current,
+          count: requestCounts.get(key) || 1
+        });
       }
       return acc;
-    }, []);
+    }, uniqueRequests);
 
     return uniqueRequests;
   }

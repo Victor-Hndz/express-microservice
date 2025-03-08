@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Loader2, UserX, Edit2, Send } from "lucide-react";
+import { User, Loader2, UserX, Edit2, Send, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type Request } from "@shared/schema";
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [, setLocation] = useLocation();
 
-  const { data: requests = [] } = useQuery<Request[]>({
+  const { data: requests = [], refetch } = useQuery<(Request & { count: number })[]>({
     queryKey: ["/api/requests"],
   });
 
@@ -150,8 +150,17 @@ export default function ProfilePage() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Request History</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => refetch()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
         </CardHeader>
         <CardContent>
           {requests.length === 0 ? (
@@ -169,6 +178,11 @@ export default function ProfilePage() {
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(request.createdAt), 'PPpp')}
                       </span>
+                      {request.count > 1 && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          Requested {request.count} times
+                        </span>
+                      )}
                     </div>
                     {request.outDir && <p className="text-sm">Output Directory: {request.outDir}</p>}
                     <p className="text-sm">Debug Mode: {request.debug ? "Enabled" : "Disabled"}</p>
