@@ -44,15 +44,12 @@ export default function HomePage() {
 
   // Parse URL parameters for pre-filling form
   useEffect(() => {
-    console.log("location: ", location);
-    const params = new URLSearchParams(location.split("?")[1]);
+    const fullUrl = window.location.href;
+    const params = new URL(fullUrl).searchParams;
     const variable = params.get("variable");
     const outDir = params.get("outDir");
     const debug = params.get("debug");
 
-    console.log("params:", params);
-
-    console.log("Setting form values: ", { variable, outDir, debug });
     if (variable || outDir || debug) {
       form.reset({
         variable: variable as "geopotential" | "temperature",

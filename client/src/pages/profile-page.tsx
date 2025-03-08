@@ -28,6 +28,7 @@ import { insertUserSchema, type Request } from "@shared/schema";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 export default function ProfilePage() {
   const { user, updateProfileMutation, deleteProfileMutation } = useAuth();
@@ -163,7 +164,12 @@ export default function ProfilePage() {
                   className="flex items-center justify-between p-4 border rounded-lg bg-card"
                 >
                   <div className="space-y-1">
-                    <p className="font-medium">Variable: {request.variable}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">Variable: {request.variable}</p>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(request.createdAt), 'PPpp')}
+                      </span>
+                    </div>
                     {request.outDir && <p className="text-sm">Output Directory: {request.outDir}</p>}
                     <p className="text-sm">Debug Mode: {request.debug ? "Enabled" : "Disabled"}</p>
                   </div>

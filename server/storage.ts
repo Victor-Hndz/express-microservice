@@ -6,7 +6,7 @@ import {
   type Request,
   type InsertRequest,
 } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db, pool } from "./db";
@@ -59,12 +59,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRequest(request: InsertRequest & { userId?: number }): Promise<Request> {
-    const [createdRequest] = await db.insert(requests).values(request).returning();
+    const [createdRequest] = await db
+      .insert(requests)
+      .values({
+        ...request,
+        userId: request.userId,
+        createdAt: new Date(),
+      })
+      .returning();
     return createdRequest;
   }
 
   async getUserRequests(userId: number): Promise<Request[]> {
-    return db.select().from(requests).where(eq(requests.userId, userId));
+    // Get all requests and order by creation date
+    const allRequests = await db
+      .select()
+      .from(requests)
+      .where(eq(requests.userId, userId))
+      .orderBy(desc(requests.createdAt));
+
+    // Filter out duplicate requests (same variable, outDir, and debug settings)
+    const uniqueRequests = allRequests.reduce((acc: Request[], current: Request) => {
+      const isDuplicate = acc.some(request => 
+        request.variable === current.variable &&
+        request.outDir === current.outDir &&
+        request.debug === current.debug
+      );
+
+      if (!isDuplicate) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    return uniqueRequests;
   }
 }
 
