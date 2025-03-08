@@ -21,17 +21,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Loader2, UserX, Edit2 } from "lucide-react";
+import { User, Loader2, UserX, Edit2, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema } from "@shared/schema";
+import { insertUserSchema, type Request } from "@shared/schema";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ProfilePage() {
   const { user, updateProfileMutation, deleteProfileMutation } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [, setLocation] = useLocation();
+
+  const { data: requests = [] } = useQuery<Request[]>({
+    queryKey: ["/api/requests"],
+  });
 
   const form = useForm({
     resolver: zodResolver(insertUserSchema.pick({ username: true })),
@@ -52,9 +57,13 @@ export default function ProfilePage() {
     });
   };
 
+  const handleRequestAgain = (request: Request) => {
+    setLocation(`/?variable=${request.variable}&outDir=${request.outDir || ''}&debug=${request.debug}`);
+  };
+
   return (
     <div className="container mx-auto p-8">
-      <Card className="max-w-2xl mx-auto">
+      <Card className="max-w-2xl mx-auto mb-8">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
@@ -134,6 +143,36 @@ export default function ProfilePage() {
                   {user?.username}
                 </p>
               </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Request History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {requests.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No requests yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {requests.map((request) => (
+                <div
+                  key={request.id}
+                  className="flex items-center justify-between p-4 border rounded-lg bg-card"
+                >
+                  <div className="space-y-1">
+                    <p className="font-medium">Variable: {request.variable}</p>
+                    {request.outDir && <p className="text-sm">Output Directory: {request.outDir}</p>}
+                    <p className="text-sm">Debug Mode: {request.debug ? "Enabled" : "Disabled"}</p>
+                  </div>
+                  <Button onClick={() => handleRequestAgain(request)} size="sm">
+                    <Send className="h-4 w-4 mr-2" />
+                    Request Again
+                  </Button>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>

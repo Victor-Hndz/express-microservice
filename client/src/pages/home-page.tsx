@@ -18,19 +18,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { User, Send, RefreshCw } from "lucide-react";
+import { User, Send, RefreshCw, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRequestSchema, FormValues, Variable } from "@shared/schema";
+import { insertRequestSchema } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "wouter";
+import { useEffect } from "react";
+import { Variable } from "@shared/schema";
+
 
 export default function HomePage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [location] = useLocation();
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(insertRequestSchema),
     defaultValues: {
       variable: undefined,
@@ -39,8 +44,24 @@ export default function HomePage() {
     },
   });
 
+  // Parse URL parameters for pre-filling form
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1]);
+    const variable = params.get('variable');
+    const outDir = params.get('outDir');
+    const debug = params.get('debug');
+
+    if (variable || outDir || debug) {
+      form.reset({
+        variable: variable as "geopotential" | "temperature" | undefined,
+        outDir: outDir || "",
+        debug: debug === "true",
+      });
+    }
+  }, [location, form]);
+
   const submitMutation = useMutation({
-    mutationFn: async (data: FormValues) => {
+    mutationFn: async (data: typeof form.getValues) => {
       const res = await apiRequest("POST", "/api/requests", data);
       return res.json();
     },
@@ -64,7 +85,30 @@ export default function HomePage() {
     },
   });
 
-  const onSubmit = form.handleSubmit((data: FormValues) => submitMutation.mutate(data));
+  const onSubmit = form.handleSubmit((data) => {
+    submitMutation.mutate(data);
+  });
+
+  if (!user) {
+    return (
+      <div className="container mx-auto p-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Request System</h2>
+            <p className="text-muted-foreground mb-6">
+              Please log in to submit requests.
+            </p>
+            <Button asChild>
+              <Link href="/auth">
+                <LogIn className="h-4 w-4 mr-2" />
+                Login to Continue
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-8">
@@ -75,11 +119,7 @@ export default function HomePage() {
         <CardContent className="space-y-6">
           <div className="flex items-center gap-3 text-muted-foreground mb-6">
             <User className="h-5 w-5" />
-            {user ? (
-              <span>Welcome back, {user.username}!</span>
-            ) : (
-              <span>Welcome, anonymous user!</span>
-            )}
+            <span>Welcome back, {user.username}!</span>
           </div>
 
           <Form {...form}>
@@ -90,15 +130,18 @@ export default function HomePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Variable</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Choose a variable..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={Variable.Geopotential}>Geopotential</SelectItem>
-                        <SelectItem value={Variable.Temperature}>Temperature</SelectItem>
+                        <SelectItem value="geopotential">Geopotential</SelectItem>
+                        <SelectItem value="temperature">Temperature</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -126,7 +169,10 @@ export default function HomePage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Enable Debug Mode</FormLabel>
@@ -136,20 +182,22 @@ export default function HomePage() {
               />
 
               <div className="flex gap-4">
-                <Button type="submit" className="flex-1" disabled={submitMutation.isPending}>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={submitMutation.isPending}
+                >
                   <Send className="h-4 w-4 mr-2" />
                   Submit Request
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    form.reset({
-                      variable: undefined,
-                      outDir: "",
-                      debug: false,
-                    })
-                  }
+                  onClick={() => form.reset({
+                    variable: undefined,
+                    outDir: "",
+                    debug: false,
+                  })}
                   disabled={submitMutation.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
