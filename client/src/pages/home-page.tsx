@@ -27,8 +27,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useEffect } from "react";
-import { Variable } from "@shared/schema";
-
 
 export default function HomePage() {
   const { user } = useAuth();
