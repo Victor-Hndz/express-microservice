@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -348,9 +347,23 @@ export default function HomePage() {
                                 <span className="text-sm">Select All</span>
                               </div>
                               {Object.entries(TypesEnum).map(([key, value]) => (
-                                <SelectItem key={value} value={value}>
-                                  {key}
-                                </SelectItem>
+                                <div key={value} className="flex items-center space-x-2 py-1">
+                                  <Checkbox
+                                    checked={selectedTypes.includes(value)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        const newTypes = [...selectedTypes, value];
+                                        setSelectedTypes(newTypes);
+                                        field.onChange(newTypes.join(","));
+                                      } else {
+                                        const newTypes = selectedTypes.filter((t) => t !== value);
+                                        setSelectedTypes(newTypes);
+                                        field.onChange(newTypes.join(","));
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-sm">{key}</span>
+                                </div>
                               ))}
                             </div>
                           </SelectContent>
@@ -387,9 +400,23 @@ export default function HomePage() {
                                 <span className="text-sm">Select All</span>
                               </div>
                               {Object.entries(RangesEnum).map(([key, value]) => (
-                                <SelectItem key={value} value={value}>
-                                  {key}
-                                </SelectItem>
+                                <div key={value} className="flex items-center space-x-2 py-1">
+                                  <Checkbox
+                                    checked={selectedRanges.includes(value)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        const newRanges = [...selectedRanges, value];
+                                        setSelectedRanges(newRanges);
+                                        field.onChange(newRanges.join(","));
+                                      } else {
+                                        const newRanges = selectedRanges.filter((r) => r !== value);
+                                        setSelectedRanges(newRanges);
+                                        field.onChange(newRanges.join(","));
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-sm">{key}</span>
+                                </div>
                               ))}
                             </div>
                           </SelectContent>
