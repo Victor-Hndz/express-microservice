@@ -27,7 +27,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const DEFAULT_VALUES = {
   variable: undefined,
@@ -36,7 +36,7 @@ const DEFAULT_VALUES = {
   months: "",
   days: "",
   hours: "",
-  area: "90,-180,-90,180",
+  area: "0,0,0,0",
   types: "",
   ranges: "",
   levels: "",
@@ -61,6 +61,9 @@ export default function HomePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
+  const [isFullArea, setIsFullArea] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
 
   const form = useForm({
     resolver: zodResolver(insertRequestSchema),
@@ -68,6 +71,25 @@ export default function HomePage() {
   });
 
   const watchIsAll = form.watch("isAll");
+
+  // Effect for handling full area checkbox
+  useEffect(() => {
+    if (isFullArea) {
+      form.setValue("area", "90,-180,-90,180");
+    } else {
+      form.setValue("area", "0,0,0,0");
+    }
+  }, [isFullArea, form]);
+
+  // Effect for types multi-select
+  useEffect(() => {
+    form.setValue("types", selectedTypes.join(","));
+  }, [selectedTypes, form]);
+
+  // Effect for ranges multi-select
+  useEffect(() => {
+    form.setValue("ranges", selectedRanges.join(","));
+  }, [selectedRanges, form]);
 
   // Clear instants when isAll is toggled
   useEffect(() => {
@@ -104,6 +126,9 @@ export default function HomePage() {
         description: "Your request has been saved and will be processed.",
       });
       form.reset(DEFAULT_VALUES);
+      setSelectedTypes([]);
+      setSelectedRanges([]);
+      setIsFullArea(false);
     },
     onError: (error: Error) => {
       toast({
@@ -117,6 +142,22 @@ export default function HomePage() {
   const onSubmit = form.handleSubmit((data) => {
     submitMutation.mutate(data);
   });
+
+  const handleSelectAllTypes = (checked: boolean) => {
+    if (checked) {
+      setSelectedTypes(Object.values(TypesEnum));
+    } else {
+      setSelectedTypes([]);
+    }
+  };
+
+  const handleSelectAllRanges = (checked: boolean) => {
+    if (checked) {
+      setSelectedRanges(Object.values(RangesEnum));
+    } else {
+      setSelectedRanges([]);
+    }
+  };
 
   if (!user) {
     return (
@@ -258,22 +299,42 @@ export default function HomePage() {
                 </div>
 
                 {/* Area Settings */}
-                <FormField
-                  control={form.control}
-                  name="area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Area (N,W,S,E)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., 90,-180,-90,180 for global" />
-                      </FormControl>
-                      <FormDescription>Enter 4 comma-separated values (North,West,South,East)</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="fullArea"
+                      checked={isFullArea}
+                      onCheckedChange={(checked) => setIsFullArea(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="fullArea"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Use Full Area
+                    </label>
+                  </div>
 
-                {/* Types and Ranges */}
+                  <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Area (N,W,S,E)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isFullArea}
+                            placeholder="e.g., 0,0,0,0"
+                          />
+                        </FormControl>
+                        <FormDescription>Enter 4 comma-separated values (North,West,South,East)</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Types and Ranges with Multi-select */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
@@ -281,12 +342,30 @@ export default function HomePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Types</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., cont,disp,comb" />
-                        </FormControl>
-                        <FormDescription>
-                          Available: cont, disp, comb, forms
-                        </FormDescription>
+                        <div className="border rounded-md p-4 space-y-2">
+                          <div className="flex items-center space-x-2 pb-2 border-b">
+                            <Checkbox
+                              checked={selectedTypes.length === Object.keys(TypesEnum).length}
+                              onCheckedChange={handleSelectAllTypes}
+                            />
+                            <span className="text-sm">Select All</span>
+                          </div>
+                          {Object.entries(TypesEnum).map(([key, value]) => (
+                            <div key={value} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedTypes.includes(value)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedTypes([...selectedTypes, value]);
+                                  } else {
+                                    setSelectedTypes(selectedTypes.filter((t) => t !== value));
+                                  }
+                                }}
+                              />
+                              <span className="text-sm">{key}</span>
+                            </div>
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -298,12 +377,30 @@ export default function HomePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ranges</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., max,min,both" />
-                        </FormControl>
-                        <FormDescription>
-                          Available: max, min, both, comb
-                        </FormDescription>
+                        <div className="border rounded-md p-4 space-y-2">
+                          <div className="flex items-center space-x-2 pb-2 border-b">
+                            <Checkbox
+                              checked={selectedRanges.length === Object.keys(RangesEnum).length}
+                              onCheckedChange={handleSelectAllRanges}
+                            />
+                            <span className="text-sm">Select All</span>
+                          </div>
+                          {Object.entries(RangesEnum).map(([key, value]) => (
+                            <div key={value} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedRanges.includes(value)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedRanges([...selectedRanges, value]);
+                                  } else {
+                                    setSelectedRanges(selectedRanges.filter((r) => r !== value));
+                                  }
+                                }}
+                              />
+                              <span className="text-sm">{key}</span>
+                            </div>
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -627,7 +724,12 @@ export default function HomePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => form.reset(DEFAULT_VALUES)}
+                  onClick={() => {
+                    form.reset(DEFAULT_VALUES);
+                    setSelectedTypes([]);
+                    setSelectedRanges([]);
+                    setIsFullArea(false);
+                  }}
                   disabled={submitMutation.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
