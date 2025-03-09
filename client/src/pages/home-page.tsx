@@ -81,16 +81,6 @@ export default function HomePage() {
     }
   }, [isFullArea, form]);
 
-  // Effect for types multi-select
-  useEffect(() => {
-    form.setValue("types", selectedTypes.join(","));
-  }, [selectedTypes, form]);
-
-  // Effect for ranges multi-select
-  useEffect(() => {
-    form.setValue("ranges", selectedRanges.join(","));
-  }, [selectedRanges, form]);
-
   // Clear instants when isAll is toggled
   useEffect(() => {
     if (watchIsAll) {
@@ -342,30 +332,34 @@ export default function HomePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Types</FormLabel>
-                        <div className="border rounded-md p-4 space-y-2">
-                          <div className="flex items-center space-x-2 pb-2 border-b">
-                            <Checkbox
-                              checked={selectedTypes.length === Object.keys(TypesEnum).length}
-                              onCheckedChange={handleSelectAllTypes}
-                            />
-                            <span className="text-sm">Select All</span>
-                          </div>
-                          {Object.entries(TypesEnum).map(([key, value]) => (
-                            <div key={value} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={selectedTypes.includes(value)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setSelectedTypes([...selectedTypes, value]);
-                                  } else {
-                                    setSelectedTypes(selectedTypes.filter((t) => t !== value));
-                                  }
-                                }}
-                              />
-                              <span className="text-sm">{key}</span>
+                        <Select>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select types..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <div className="p-2 space-y-2">
+                              <div className="flex items-center space-x-2 pb-2 border-b">
+                                <Checkbox
+                                  checked={selectedTypes.length === Object.keys(TypesEnum).length}
+                                  onCheckedChange={handleSelectAllTypes}
+                                />
+                                <span className="text-sm">Select All</span>
+                              </div>
+                              {Object.entries(TypesEnum).map(([key, value]) => (
+                                <SelectItem key={value} value={value}>
+                                  {key}
+                                </SelectItem>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SelectContent>
+                        </Select>
+                        {selectedTypes.length > 0 && (
+                          <FormDescription>
+                            Selected: {selectedTypes.join(", ")}
+                          </FormDescription>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -377,30 +371,34 @@ export default function HomePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ranges</FormLabel>
-                        <div className="border rounded-md p-4 space-y-2">
-                          <div className="flex items-center space-x-2 pb-2 border-b">
-                            <Checkbox
-                              checked={selectedRanges.length === Object.keys(RangesEnum).length}
-                              onCheckedChange={handleSelectAllRanges}
-                            />
-                            <span className="text-sm">Select All</span>
-                          </div>
-                          {Object.entries(RangesEnum).map(([key, value]) => (
-                            <div key={value} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={selectedRanges.includes(value)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setSelectedRanges([...selectedRanges, value]);
-                                  } else {
-                                    setSelectedRanges(selectedRanges.filter((r) => r !== value));
-                                  }
-                                }}
-                              />
-                              <span className="text-sm">{key}</span>
+                        <Select>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select ranges..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <div className="p-2 space-y-2">
+                              <div className="flex items-center space-x-2 pb-2 border-b">
+                                <Checkbox
+                                  checked={selectedRanges.length === Object.keys(RangesEnum).length}
+                                  onCheckedChange={handleSelectAllRanges}
+                                />
+                                <span className="text-sm">Select All</span>
+                              </div>
+                              {Object.entries(RangesEnum).map(([key, value]) => (
+                                <SelectItem key={value} value={value}>
+                                  {key}
+                                </SelectItem>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SelectContent>
+                        </Select>
+                        {selectedRanges.length > 0 && (
+                          <FormDescription>
+                            Selected: {selectedRanges.join(", ")}
+                          </FormDescription>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -671,44 +669,49 @@ export default function HomePage() {
                   />
                 </div>
 
+                {/* Conditional rendering for nThreads and nProces */}
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="nThreads"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Number of Threads</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            placeholder="Optional"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {form.watch("omp") && (
+                    <FormField
+                      control={form.control}
+                      name="nThreads"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Number of Threads</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              placeholder="Optional"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
-                  <FormField
-                    control={form.control}
-                    name="nProces"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Number of Processes</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            placeholder="Optional"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {form.watch("mpi") && (
+                    <FormField
+                      control={form.control}
+                      name="nProces"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Number of Processes</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              placeholder="Optional"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
 
