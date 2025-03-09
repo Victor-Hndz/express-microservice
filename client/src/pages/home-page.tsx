@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -104,8 +105,9 @@ export default function HomePage() {
     }
   }, [location, form]);
 
+  // Update the mutation section
   const submitMutation = useMutation({
-    mutationFn: async (data: typeof form.getValues) => {
+    mutationFn: async (data: typeof DEFAULT_VALUES) => {
       const res = await apiRequest("POST", "/api/requests", data);
       return res.json();
     },
@@ -121,7 +123,7 @@ export default function HomePage() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Submission failed",
+        title: "Request failed",
         description: error.message,
         variant: "destructive",
       });
@@ -129,7 +131,13 @@ export default function HomePage() {
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    submitMutation.mutate(data);
+    // Convert types and ranges from comma-separated strings to arrays
+    const formattedData = {
+      ...data,
+      types: data.types.split(","),
+      ranges: data.ranges.split(","),
+    };
+    submitMutation.mutate(formattedData);
   });
 
   const handleSelectAllTypes = (checked: boolean) => {
