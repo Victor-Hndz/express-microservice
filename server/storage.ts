@@ -5,7 +5,7 @@ import {
   type InsertUser,
   type Request,
   type InsertRequest,
-} from "@shared/schema";
+} from "@shared/schema/schema";
 import { eq, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -83,24 +83,25 @@ export class DatabaseStorage implements IStorage {
     const uniqueRequests: (Request & { count: number })[] = [];
 
     // Group requests and count duplicates
-    allRequests.forEach(request => {
+    allRequests.forEach((request) => {
       const key = `${request.variable}-${request.outDir}-${request.debug}`;
-      requestCounts.set(key, (requestCounts.get(key) || 0) + 1);
+      requestCounts.set(key, (requestCounts.get(key) ?? 0) + 1);
     });
 
     // Filter duplicates and add counts
     allRequests.reduce((acc: (Request & { count: number })[], current: Request) => {
       const key = `${current.variable}-${current.outDir}-${current.debug}`;
-      const isDuplicate = acc.some(request =>
-        request.variable === current.variable &&
-        request.outDir === current.outDir &&
-        request.debug === current.debug
+      const isDuplicate = acc.some(
+        (request) =>
+          request.variable === current.variable &&
+          request.outDir === current.outDir &&
+          request.debug === current.debug
       );
 
       if (!isDuplicate) {
         acc.push({
           ...current,
-          count: requestCounts.get(key) || 1
+          count: requestCounts.get(key) ?? 1,
         });
       }
       return acc;

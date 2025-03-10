@@ -1,7 +1,20 @@
-import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useLocation } from "wouter";
+import { format } from "date-fns";
+import { User, Loader2, UserX, Edit2, Send, RefreshCw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  insertUserSchema,
+  requestToInsertRequest,
+  type Request,
+  type InsertRequest,
+} from "@shared/schema/schema";
+import { useAuth } from "@client/hooks/use-auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@client/components/ui/card";
+import { Button } from "@client/components/ui/button";
+import { Input } from "@client/components/ui/input";
 import {
   Form,
   FormControl,
@@ -9,7 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@client/components/ui/form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,15 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { User, Loader2, UserX, Edit2, Send, RefreshCw } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema, type Request } from "@shared/schema";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+} from "@client/components/ui/alert-dialog";
 
 export default function ProfilePage() {
   const { user, updateProfileMutation, deleteProfileMutation } = useAuth();
@@ -58,8 +63,29 @@ export default function ProfilePage() {
     });
   };
 
-  const handleRequestAgain = (request: Request) => {
-    setLocation(`/?variable=${request.variable}&outDir=${request.outDir || ''}&debug=${request.debug}`);
+  const handleRequestAgain = (request: InsertRequest) => {
+    setLocation("/", {
+      state: {
+        variable: request.variable,
+        pressureLevels: request.levels,
+        types: request.types,
+        ranges: request.ranges,
+        instants: request.instants,
+        format: request.format,
+        outDir: request.outDir,
+        tracking: request.tracking,
+        debug: request.debug,
+        noCompile: request.noCompile,
+        noExecute: request.noExecute,
+        noCompileExecute: request.noCompileExecute,
+        noMaps: request.noMaps,
+        animation: request.animation,
+        omp: request.omp,
+        mpi: request.mpi,
+        nThreads: request.nThreads,
+        nProces: request.nProces,
+      },
+    });
   };
 
   return (
@@ -152,9 +178,9 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Request History</CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => refetch()}
             className="flex items-center gap-2"
           >
@@ -176,7 +202,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2">
                       <p className="font-medium">Variable: {request.variable}</p>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(request.createdAt), 'PPpp')}
+                        {format(new Date(request.createdAt), "PPpp")}
                       </span>
                       {request.count > 1 && (
                         <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
@@ -184,10 +210,15 @@ export default function ProfilePage() {
                         </span>
                       )}
                     </div>
-                    {request.outDir && <p className="text-sm">Output Directory: {request.outDir}</p>}
+                    {request.outDir && (
+                      <p className="text-sm">Output Directory: {request.outDir}</p>
+                    )}
                     <p className="text-sm">Debug Mode: {request.debug ? "Enabled" : "Disabled"}</p>
                   </div>
-                  <Button onClick={() => handleRequestAgain(request)} size="sm">
+                  <Button
+                    onClick={() => handleRequestAgain(requestToInsertRequest(request))}
+                    size="sm"
+                  >
                     <Send className="h-4 w-4 mr-2" />
                     Request Again
                   </Button>

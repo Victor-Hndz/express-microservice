@@ -1,8 +1,8 @@
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
 import { LogOut, User, Home } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@client/components/ui/button";
+import { useAuth } from "@client/hooks/use-auth";
 
 export function Navbar() {
   const { user, logoutMutation } = useAuth();

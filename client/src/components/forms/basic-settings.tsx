@@ -1,3 +1,6 @@
+import { UseFormReturn } from "react-hook-form";
+import { VariableEnum } from "@shared/enums/requests.enums";
+import { InsertRequest as RequestFormData } from "@shared/schema/schema";
 import {
   FormControl,
   FormField,
@@ -5,21 +8,18 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
+} from "@client/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { RequestFormData } from "@/types/request";
-import { VariableEnum } from "@shared/schema";
+} from "@client/components/ui/select";
+import { Input } from "@client/components/ui/input";
 
 interface BasicSettingsProps {
-  form: UseFormReturn<RequestFormData>;
+  readonly form: UseFormReturn<RequestFormData>;
 }
 
 export function BasicSettings({ form }: BasicSettingsProps) {

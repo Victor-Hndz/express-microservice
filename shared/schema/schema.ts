@@ -1,40 +1,14 @@
 import { pgTable, serial, text, boolean, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { VariableEnum, TypesEnum, RangesEnum, FormatEnum } from "@shared/enums/requests.enums";
+import { stringToNumberArray, stringToStringArray } from "@shared/utils/stringConvertion";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
 });
-
-// Enums
-export const VariableEnum = {
-  Geopotential: "geopotential",
-  Temperature: "temperature",
-} as const;
-
-export const TypesEnum = {
-  Cont: "cont",
-  Disp: "disp",
-  Comb: "comb",
-  Forms: "forms",
-} as const;
-
-export const RangesEnum = {
-  Max: "max",
-  Min: "min",
-  Both: "both",
-  Comb: "comb",
-} as const;
-
-export const FormatEnum = {
-  PNG: "png",
-  JPG: "jpg",
-  JPEG: "jpeg",
-  PDF: "pdf",
-  SVG: "svg",
-} as const;
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
@@ -67,23 +41,10 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users)
-  .extend({
-    username: z.string().min(1, "Username is required"),
-    password: z.string().min(1, "Password is required"),
-  });
-
-// Helper function to convert comma-separated string to number array
-const stringToNumberArray = (value: unknown) =>
-  typeof value === "string"
-    ? value.split(",").map((s) => Number(s.trim())).filter((n) => !isNaN(n))
-    : value;
-
-// Helper function to convert comma-separated string to string array
-const stringToStringArray = (value: unknown) =>
-  typeof value === "string"
-    ? value.split(",").map((s) => s.trim()).filter(Boolean)
-    : value;
+export const insertUserSchema = createInsertSchema(users).extend({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
 
 export const insertRequestSchema = createInsertSchema(requests)
   .extend({
@@ -116,13 +77,15 @@ export const insertRequestSchema = createInsertSchema(requests)
     ),
     types: z.preprocess(
       stringToStringArray,
-      z.enum([TypesEnum.Cont, TypesEnum.Disp, TypesEnum.Comb, TypesEnum.Forms])
+      z
+        .enum([TypesEnum.Cont, TypesEnum.Disp, TypesEnum.Comb, TypesEnum.Forms])
         .array()
         .min(1, "At least one type is required")
     ),
     ranges: z.preprocess(
       stringToStringArray,
-      z.enum([RangesEnum.Max, RangesEnum.Min, RangesEnum.Both, RangesEnum.Comb])
+      z
+        .enum([RangesEnum.Max, RangesEnum.Min, RangesEnum.Both, RangesEnum.Comb])
         .array()
         .min(1, "At least one range is required")
     ),
@@ -130,12 +93,11 @@ export const insertRequestSchema = createInsertSchema(requests)
       stringToNumberArray,
       z.number().array().min(1, "At least one level is required")
     ),
-    instants: z.preprocess(
-      stringToNumberArray,
-      z.number().array().optional()
-    ),
+    instants: z.preprocess(stringToNumberArray, z.number().array().optional()),
     isAll: z.boolean().optional(),
-    format: z.enum([FormatEnum.PNG, FormatEnum.JPG, FormatEnum.JPEG, FormatEnum.PDF, FormatEnum.SVG]).optional(),
+    format: z
+      .enum([FormatEnum.PNG, FormatEnum.JPG, FormatEnum.JPEG, FormatEnum.PDF, FormatEnum.SVG])
+      .optional(),
     outDir: z.string().optional(),
     tracking: z.boolean().optional(),
     debug: z.boolean().optional(),
@@ -146,8 +108,8 @@ export const insertRequestSchema = createInsertSchema(requests)
     animation: z.boolean().optional(),
     omp: z.boolean().optional(),
     mpi: z.boolean().optional(),
-    nThreads: z.preprocess((val) => val === "" ? undefined : Number(val), z.number().optional()),
-    nProces: z.preprocess((val) => val === "" ? undefined : Number(val), z.number().optional()),
+    nThreads: z.preprocess((val) => (val === "" ? undefined : Number(val)), z.number().optional()),
+    nProces: z.preprocess((val) => (val === "" ? undefined : Number(val)), z.number().optional()),
   })
   .refine(
     (data) => {
@@ -162,11 +124,43 @@ export const insertRequestSchema = createInsertSchema(requests)
       return true;
     },
     {
-      message: "When 'All' is selected, instants should be empty. When 'All' is not selected, instants are required.",
+      message:
+        "When 'All' is selected, instants should be empty. When 'All' is not selected, instants are required.",
     }
   );
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
+//Function to transform Request to InsertRequest
+export function requestToInsertRequest(request: Request): InsertRequest {
+  return {
+    variable: request.variable as VariableEnum,
+    pressureLevels: request.pressureLevels,
+    years: request.years,
+    months: request.months,
+    days: request.days,
+    hours: request.hours,
+    area: request.area,
+    types: request.types as TypesEnum[],
+    ranges: request.ranges as RangesEnum[],
+    levels: request.levels,
+    instants: request.instants ?? [],
+    isAll: request.isAll ?? false,
+    format: request.format as FormatEnum,
+    outDir: request.outDir ?? "",
+    tracking: request.tracking ?? false,
+    debug: request.debug ?? false,
+    noCompile: request.noCompile ?? false,
+    noExecute: request.noExecute ?? false,
+    noCompileExecute: request.noCompileExecute ?? false,
+    noMaps: request.noMaps ?? false,
+    animation: request.animation ?? false,
+    omp: request.omp ?? false,
+    mpi: request.mpi ?? false,
+    nThreads: request.nThreads ?? 1,
+    nProces: request.nProces ?? 0,
+  };
+}
+
 export type User = typeof users.$inferSelect;
-export type InsertRequest = z.infer<typeof insertRequestSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Request = typeof requests.$inferSelect;
+export type InsertRequest = z.infer<typeof insertRequestSchema>;

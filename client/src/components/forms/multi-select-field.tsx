@@ -1,3 +1,5 @@
+import { InsertRequest as RequestFormData } from "@shared/schema/schema";
+import { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -5,25 +7,18 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { UseFormReturn } from "react-hook-form";
-import { RequestFormData } from "@/types/request";
+} from "@client/components/ui/form";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@client/components/ui/select";
+import { Checkbox } from "@client/components/ui/checkbox";
 
 interface MultiSelectFieldProps {
-  form: UseFormReturn<RequestFormData>;
-  name: "types" | "ranges";
-  label: string;
-  options: Record<string, string>;
-  selectedItems: string[];
-  onSelectAll: (checked: boolean) => void;
-  onSelectItem: (value: string, checked: boolean) => void;
+  readonly form: UseFormReturn<RequestFormData>;
+  readonly name: "types" | "ranges";
+  readonly label: string;
+  readonly options: Record<string, string>;
+  readonly selectedItems: string[];
+  readonly onSelectAll: (checked: boolean) => void;
+  readonly onSelectItem: (value: string, checked: boolean) => void;
 }
 
 export function MultiSelectField({
@@ -76,9 +71,7 @@ export function MultiSelectField({
             </SelectContent>
           </Select>
           {selectedItems.length > 0 && (
-            <FormDescription>
-              Selected: {selectedItems.join(", ")}
-            </FormDescription>
+            <FormDescription>Selected: {selectedItems.join(", ")}</FormDescription>
           )}
           <FormMessage />
         </FormItem>

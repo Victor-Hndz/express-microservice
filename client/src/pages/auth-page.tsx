@@ -1,11 +1,15 @@
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema } from "@shared/schema";
 import { useForm } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Redirect } from "wouter";
+import { Loader2, KeyRound, User, Lock } from "lucide-react";
+import { motion } from "framer-motion";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertUserSchema } from "@shared/schema/schema";
+import { useAuth } from "@client/hooks/use-auth";
+import { Button } from "@client/components/ui/button";
+import { Input } from "@client/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@client/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@client/components/ui/tabs";
+import { slideAnimation } from "@client/consts/animations";
 import {
   Form,
   FormControl,
@@ -13,16 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Redirect } from "wouter";
-import { Loader2, KeyRound, User, Lock } from "lucide-react";
-import { motion } from "framer-motion";
-
-const slideAnimation = {
-  initial: { x: 10, opacity: 0 },
-  animate: { x: 0, opacity: 1 },
-  exit: { x: -10, opacity: 0 },
-};
+} from "@client/components/ui/form";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
