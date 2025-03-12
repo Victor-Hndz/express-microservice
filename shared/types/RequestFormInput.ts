@@ -1,0 +1,24 @@
+export type RequestFormInput = {
+  variableName: string;
+  pressureLevels: number[];
+  years: number[];
+  months: number[];
+  days: number[];
+  hours: number[];
+  areaCovered: number[];
+  mapTypes: string[];
+  mapRanges: string[];
+  mapLevels?: number[];
+  fileFormat?: string;
+  outDir?: string;
+  tracking?: boolean;
+  debug?: boolean;
+  noCompile?: boolean;
+  noExecute?: boolean;
+  noMaps?: boolean;
+  animation?: boolean;
+  omp?: boolean;
+  mpi?: boolean;
+  nThreads?: number;
+  nProces?: number;
+};

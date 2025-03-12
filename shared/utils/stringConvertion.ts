@@ -1,6 +1,6 @@
 // Helper function to convert comma-separated string to number array
-export const stringToNumberArray = (value: string) => {
-  return value !== ""
+export const stringToNumberArray = (value: unknown) => {
+  return typeof value === "string"
     ? value
         .split(",")
         .map((s) => Number(s.trim()))

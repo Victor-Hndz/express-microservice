@@ -1,3 +1,6 @@
+import { eq, desc } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
 import {
   users,
   requests,
@@ -6,9 +9,6 @@ import {
   type Request,
   type InsertRequest,
 } from "@shared/schema/schema";
-import { eq, desc } from "drizzle-orm";
-import session from "express-session";
-import connectPg from "connect-pg-simple";
 import { db, pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
@@ -80,32 +80,35 @@ export class DatabaseStorage implements IStorage {
 
     // Create a map to store counts of duplicate requests
     const requestCounts = new Map<string, number>();
-    const uniqueRequests: (Request & { count: number })[] = [];
+    let uniqueRequests: (Request & { count: number })[] = [];
 
     // Group requests and count duplicates
     allRequests.forEach((request) => {
-      const key = `${request.variable}-${request.outDir}-${request.debug}`;
+      const key = `${request.variableName}-${request.outDir}-${request.debug}`;
       requestCounts.set(key, (requestCounts.get(key) ?? 0) + 1);
     });
 
     // Filter duplicates and add counts
-    allRequests.reduce((acc: (Request & { count: number })[], current: Request) => {
-      const key = `${current.variable}-${current.outDir}-${current.debug}`;
-      const isDuplicate = acc.some(
-        (request) =>
-          request.variable === current.variable &&
-          request.outDir === current.outDir &&
-          request.debug === current.debug
-      );
+    uniqueRequests = allRequests.reduce(
+      (acc: (Request & { count: number })[], current: Request) => {
+        const key = `${current.variableName}-${current.outDir}-${current.debug}`;
+        const isDuplicate = acc.some(
+          (request) =>
+            request.variableName === current.variableName &&
+            request.outDir === current.outDir &&
+            request.debug === current.debug
+        );
 
-      if (!isDuplicate) {
-        acc.push({
-          ...current,
-          count: requestCounts.get(key) ?? 1,
-        });
-      }
-      return acc;
-    }, uniqueRequests);
+        if (!isDuplicate) {
+          acc.push({
+            ...current,
+            count: requestCounts.get(key) ?? 1,
+          });
+        }
+        return acc;
+      },
+      uniqueRequests
+    );
 
     return uniqueRequests;
   }
