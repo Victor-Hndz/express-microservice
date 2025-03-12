@@ -1,8 +1,8 @@
 import { Link } from "wouter";
 import { LogOut, User, Home } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@client/components/ui/button";
-import { useAuth } from "@client/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Navbar() {
   const { user, logoutMutation } = useAuth();
@@ -16,15 +16,17 @@ export function Navbar() {
       <div className="container flex h-16 items-center px-4">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">Express Microservice App</span>
+            <span className="hidden font-bold sm:inline-block">
+              Express Microservice App - Home
+            </span>
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex justify-start md:w-auto gap-4">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/">
+              <Link href="/request">
                 <Home className="h-4 w-4 mr-2" />
-                Home
+                Requests
               </Link>
             </Button>
             {user ? (

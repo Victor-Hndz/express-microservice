@@ -1,8 +1,8 @@
 import { createContext, ReactNode, useContext, useMemo } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
 import { User, InsertUser } from "@shared/schema/schema";
-import { useToast } from "@client/hooks/use-toast";
-import { getQueryFn, apiRequest, queryClient } from "@client/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 
 type AuthContextType = {
   user: User | null;

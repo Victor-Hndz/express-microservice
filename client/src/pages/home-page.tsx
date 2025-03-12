@@ -1,115 +1,53 @@
-import { Send, RefreshCw } from "lucide-react";
-import { TypesEnum, RangesEnum } from "@shared/enums/requests.enums";
-import { Card, CardContent, CardHeader, CardTitle } from "@client/components/ui/card";
-import { Button } from "@client/components/ui/button";
-import { Form } from "@client/components/ui/form";
-import { useRequestForm } from "@client/hooks/use-request-form";
-import { BasicSettings } from "@client/components/forms/basic-settings";
-import { MultiSelectField } from "@client/components/forms/multi-select-field";
+import { Button } from "@/components/ui/button";
+import { Rocket, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
-  const {
-    form,
-    selectedTypes,
-    setSelectedTypes,
-    selectedRanges,
-    setSelectedRanges,
-    handleSubmit,
-    resetForm,
-    isSubmitting,
-  } = useRequestForm();
-
-  const handleSelectType = (type: TypesEnum) => {
-    setSelectedTypes([...selectedTypes, type]);
-  };
-
-  const handleDeselectType = (type: TypesEnum) => {
-    setSelectedTypes(selectedTypes.filter((t) => t !== type));
-  };
-
-  const handleSelectAllTypes = () => {
-    setSelectedTypes(Object.values(TypesEnum));
-  };
-
-  const handleDeselectAllTypes = () => {
-    setSelectedTypes([]);
-  };
-
-  const handleSelectRange = (range: RangesEnum) => {
-    setSelectedRanges([...selectedRanges, range]);
-  };
-
-  const handleDeselectRange = (range: RangesEnum) => {
-    setSelectedRanges(selectedRanges.filter((r) => r !== range));
-  };
-
-  const handleSelectAllRanges = () => {
-    setSelectedRanges(Object.values(RangesEnum));
-  };
-
-  const handleDeselectAllRanges = () => {
-    setSelectedRanges([]);
-  };
-
   return (
-    <div className="container mx-auto p-8">
-      <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Submit Request</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Form {...form}>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <BasicSettings form={form} />
+    <div className="container mx-auto px-4 py-12">
+      {/* Sección de Bienvenida */}
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          Bienvenido a <span className="text-blue-600">Nuestra Plataforma</span>
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
+          La mejor solución para gestionar y optimizar tu trabajo de manera eficiente.
+        </p>
+        <div className="mt-6 flex justify-center gap-4">
+          <Button variant="default" className="px-6 py-3 flex items-center gap-2">
+            <Rocket className="w-5 h-5" />
+            Empezar Ahora
+          </Button>
+          <Button variant="outline" className="px-6 py-3 flex items-center gap-2">
+            Más Información
+            <ArrowRight className="w-5 h-5" />
+          </Button>
+        </div>
+      </section>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <MultiSelectField
-                  form={form}
-                  name="types"
-                  label="Types"
-                  options={TypesEnum}
-                  selectedItems={selectedTypes}
-                  onSelectAll={(checkedAllTypes) =>
-                    checkedAllTypes ? handleSelectAllTypes() : handleDeselectAllTypes()
-                  }
-                  onSelectItem={(valueSelectType, checkedType) =>
-                    checkedType
-                      ? handleSelectType(valueSelectType as TypesEnum)
-                      : handleDeselectType(valueSelectType as TypesEnum)
-                  }
-                />
-
-                <MultiSelectField
-                  form={form}
-                  name="ranges"
-                  label="Ranges"
-                  options={RangesEnum}
-                  selectedItems={selectedRanges}
-                  onSelectAll={(checkedAllRanges) =>
-                    checkedAllRanges ? handleSelectAllRanges() : handleDeselectAllRanges()
-                  }
-                  onSelectItem={(valueSelectRange, checkedRange) => {
-                    checkedRange
-                      ? handleSelectRange(valueSelectRange as RangesEnum)
-                      : handleDeselectRange(valueSelectRange as RangesEnum);
-                  }}
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit Request
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Form
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+      {/* Sección de Características */}
+      <section className="mt-16 grid md:grid-cols-3 gap-8 text-center">
+        <div className="p-6 rounded-lg shadow-md bg-white dark:bg-gray-800">
+          <Sparkles className="w-10 h-10 mx-auto text-blue-500" />
+          <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Innovador</h3>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            Utilizamos las últimas tecnologías para brindarte la mejor experiencia.
+          </p>
+        </div>
+        <div className="p-6 rounded-lg shadow-md bg-white dark:bg-gray-800">
+          <CheckCircle className="w-10 h-10 mx-auto text-green-500" />
+          <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Eficiente</h3>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            Optimiza tus procesos y ahorra tiempo con nuestra plataforma.
+          </p>
+        </div>
+        <div className="p-6 rounded-lg shadow-md bg-white dark:bg-gray-800">
+          <Rocket className="w-10 h-10 mx-auto text-purple-500" />
+          <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Escalable</h3>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            Diseñado para crecer contigo y adaptarse a tus necesidades.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

@@ -4,12 +4,12 @@ import { Loader2, KeyRound, User, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema/schema";
-import { useAuth } from "@client/hooks/use-auth";
-import { Button } from "@client/components/ui/button";
-import { Input } from "@client/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@client/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@client/components/ui/tabs";
-import { slideAnimation } from "@client/consts/animations";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { slideAnimation } from "@shared/consts/animations";
 import {
   Form,
   FormControl,
@@ -17,7 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@client/components/ui/form";
+} from "@/components/ui/form";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();

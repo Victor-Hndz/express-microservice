@@ -3,38 +3,35 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRequestSchema, InsertRequest as RequestFormData } from "@shared/schema/schema";
+import { insertRequestSchema, InsertRequest } from "@shared/schema/schema";
+import { RequestFormInput, requestFormInputToInsertRequest } from "@shared/types/RequestFormInput";
 import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
-import { apiRequest } from "@client/lib/queryClient";
-import { useToast } from "@client/hooks/use-toast";
-import { stringToNumberArray } from "@shared/utils/stringConvertion";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-const DEFAULT_VALUES: RequestFormData = {
-  variable: VariableEnum.Geopotential,
-  pressureLevels: [],
-  years: [],
-  months: [],
-  days: [],
-  hours: [],
-  area: [],
-  types: [],
-  ranges: [],
-  levels: [],
-  instants: [],
-  isAll: false,
-  format: undefined,
+const DEFAULT_VALUES: RequestFormInput = {
+  variableName: "",
+  pressureLevels: "",
+  years: "",
+  months: "",
+  days: "",
+  hours: "",
+  areaCovered: "",
+  mapTypes: "",
+  mapRanges: "",
+  mapLevels: "",
+  fileFormat: "",
   outDir: "",
-  tracking: false,
-  debug: false,
-  noCompile: false,
-  noExecute: false,
-  noCompileExecute: false,
-  noMaps: false,
-  animation: false,
-  omp: false,
-  mpi: false,
-  nThreads: 1,
-  nProces: 0,
+  tracking: "false",
+  debug: "false",
+  noCompile: "false",
+  noExecute: "false",
+  noMaps: "false",
+  animation: "false",
+  omp: "false",
+  mpi: "false",
+  nThreads: "1",
+  nProces: "0",
 };
 
 export function useRequestForm() {
@@ -44,13 +41,12 @@ export function useRequestForm() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
 
-  const form = useForm<RequestFormData>({
+  const form = useForm<RequestFormInput>({
     resolver: zodResolver(insertRequestSchema),
-    defaultValues: DEFAULT_VALUES,
   });
 
   const submitMutation = useMutation({
-    mutationFn: async (data: RequestFormData) => {
+    mutationFn: async (data: InsertRequest) => {
       const res = await apiRequest("POST", "/api/requests", data);
       return res.json();
     },
@@ -79,52 +75,42 @@ export function useRequestForm() {
 
     form.reset({
       ...DEFAULT_VALUES,
-      variable: (params.get("variable") as VariableEnum) ?? DEFAULT_VALUES.variable,
-      pressureLevels: stringToNumberArray(params.get("pressureLevels") ?? ""),
-      years: stringToNumberArray(params.get("years") ?? ""),
-      months: stringToNumberArray(params.get("months") ?? ""),
-      days: stringToNumberArray(params.get("days") ?? ""),
-      hours: stringToNumberArray(params.get("hours") ?? ""),
-      area: stringToNumberArray(params.get("area") ?? ""),
-      types: (params.getAll("types") as TypesEnum[]) ?? DEFAULT_VALUES.types,
-      ranges: (params.getAll("ranges") as RangesEnum[]) ?? DEFAULT_VALUES.ranges,
-      levels: stringToNumberArray(params.get("levels") ?? ""),
-      instants: stringToNumberArray(params.get("instants") ?? ""),
-      isAll: params.get("isAll") === "true",
-      format: (params.get("format") as FormatEnum) ?? undefined,
-      outDir: params.get("outDir") ?? "",
-      tracking: params.get("tracking") === "true",
-      debug: params.get("debug") === "true",
-      noCompile: params.get("noCompile") === "true",
-      noExecute: params.get("noExecute") === "true",
-      noCompileExecute: params.get("noCompileExecute") === "true",
-      noMaps: params.get("noMaps") === "true",
-      animation: params.get("animation") === "true",
-      omp: params.get("omp") === "true",
-      mpi: params.get("mpi") === "true",
-      nThreads: Number(params.get("nThreads")) || 1,
-      nProces: Number(params.get("nProces")) || 0,
+      variableName: params.get("variableName") as VariableEnum,
+      pressureLevels: params.get("pressureLevels") as string,
+      years: params.get("years") as string,
+      months: params.get("months") as string,
+      days: params.get("days") as string,
+      hours: params.get("hours") as string,
+      areaCovered: params.get("areaCovered") as string,
+      mapTypes: params.get("mapTypes") as TypesEnum,
+      mapRanges: params.get("mapRanges") as RangesEnum,
+      mapLevels: params.get("mapLevels") as string,
+      fileFormat: params.get("fileFormat") as FormatEnum,
+      outDir: params.get("outDir") as string,
+      tracking: params.get("tracking") as string,
+      debug: params.get("debug") as string,
+      noCompile: params.get("noCompile") as string,
+      noExecute: params.get("noExecute") as string,
+      noMaps: params.get("noMaps") as string,
+      animation: params.get("animation") as string,
+      omp: params.get("omp") as string,
+      mpi: params.get("mpi") as string,
+      nThreads: params.get("nThreads") as string,
+      nProces: params.get("nProces") as string,
     });
   }, [location, form]);
 
   // Effect for handling full area checkbox
   useEffect(() => {
     if (isFullArea) {
-      form.setValue("area", stringToNumberArray("90,-180,-90,180"));
+      form.setValue("areaCovered", "90,-180,-90,180");
     } else {
-      form.setValue("area", stringToNumberArray("0,0,0,0"));
+      form.setValue("areaCovered", "0,0,0,0");
     }
   }, [isFullArea, form]);
 
-  // Clear instants when isAll is toggled
-  useEffect(() => {
-    if (form.watch("isAll")) {
-      form.setValue("instants", "");
-    }
-  }, [form.watch("isAll"), form]);
-
   const handleSubmit = form.handleSubmit((data) => {
-    submitMutation.mutate(data);
+    submitMutation.mutate(requestFormInputToInsertRequest(data));
   });
 
   const resetForm = () => {

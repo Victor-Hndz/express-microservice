@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { VariableEnum } from "@shared/enums/requests.enums";
-import { InsertRequest as RequestFormData } from "@shared/schema/schema";
+import { RequestFormInput } from "@shared/types/RequestFormInput";
 import {
   FormControl,
   FormField,
@@ -8,18 +8,18 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@client/components/ui/form";
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@client/components/ui/select";
-import { Input } from "@client/components/ui/input";
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface BasicSettingsProps {
-  readonly form: UseFormReturn<RequestFormData>;
+  readonly form: UseFormReturn<RequestFormInput>;
 }
 
 export function BasicSettings({ form }: BasicSettingsProps) {
@@ -29,7 +29,7 @@ export function BasicSettings({ form }: BasicSettingsProps) {
 
       <FormField
         control={form.control}
-        name="variable"
+        name="variableName"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Variable</FormLabel>
@@ -60,12 +60,20 @@ export function BasicSettings({ form }: BasicSettingsProps) {
           <FormField
             key={name}
             control={form.control}
-            name={name as keyof RequestFormData}
+            name={name as keyof RequestFormInput}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{label}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={placeholder} />
+                  <Input
+                    {...field}
+                    placeholder={placeholder}
+                    value={
+                      typeof field.value === "string" || typeof field.value === "number"
+                        ? field.value
+                        : "test"
+                    }
+                  />
                 </FormControl>
                 <FormDescription>Enter comma-separated values</FormDescription>
                 <FormMessage />

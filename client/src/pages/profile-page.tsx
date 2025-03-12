@@ -11,10 +11,10 @@ import {
   type Request,
   type InsertRequest,
 } from "@shared/schema/schema";
-import { useAuth } from "@client/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@client/components/ui/card";
-import { Button } from "@client/components/ui/button";
-import { Input } from "@client/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -22,7 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@client/components/ui/form";
+} from "@/components/ui/form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@client/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 
 export default function ProfilePage() {
   const { user, updateProfileMutation, deleteProfileMutation } = useAuth();

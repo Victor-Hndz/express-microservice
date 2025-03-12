@@ -1,5 +1,5 @@
-import { InsertRequest as RequestFormData } from "@shared/schema/schema";
 import { UseFormReturn } from "react-hook-form";
+import { RequestFormInput } from "@shared/types/RequestFormInput";
 import {
   FormControl,
   FormField,
@@ -7,13 +7,13 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@client/components/ui/form";
-import { Select, SelectContent, SelectTrigger, SelectValue } from "@client/components/ui/select";
-import { Checkbox } from "@client/components/ui/checkbox";
+} from "@/components/ui/form";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MultiSelectFieldProps {
-  readonly form: UseFormReturn<RequestFormData>;
-  readonly name: "types" | "ranges";
+  readonly form: UseFormReturn<RequestFormInput>;
+  readonly name: "mapTypes" | "mapRanges";
   readonly label: string;
   readonly options: Record<string, string>;
   readonly selectedItems: string[];
