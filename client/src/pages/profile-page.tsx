@@ -5,12 +5,8 @@ import { format } from "date-fns";
 import { User, Loader2, UserX, Edit2, Send, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  insertUserSchema,
-  requestToInsertRequest,
-  type Request,
-  type InsertRequest,
-} from "@shared/schema/schema";
+import { insertUserSchema, type Request } from "@shared/schema/schema";
+import { insertRequestToRequestFormInput, RequestFormInput } from "@shared/types/RequestFormInput";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,21 +59,19 @@ export default function ProfilePage() {
     });
   };
 
-  const handleRequestAgain = (request: InsertRequest) => {
+  const handleRequestAgain = (request: RequestFormInput) => {
     setLocation("/", {
       state: {
-        variable: request.variable,
-        pressureLevels: request.levels,
-        types: request.types,
-        ranges: request.ranges,
-        instants: request.instants,
-        format: request.format,
+        variableName: request.variableName,
+        pressureLevels: request.pressureLevels,
+        types: request.mapTypes,
+        ranges: request.mapRanges,
+        format: request.fileFormat,
         outDir: request.outDir,
         tracking: request.tracking,
         debug: request.debug,
         noCompile: request.noCompile,
         noExecute: request.noExecute,
-        noCompileExecute: request.noCompileExecute,
         noMaps: request.noMaps,
         animation: request.animation,
         omp: request.omp,
@@ -200,7 +194,7 @@ export default function ProfilePage() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">Variable: {request.variable}</p>
+                      <p className="font-medium">Variable: {request.variableName}</p>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(request.createdAt), "PPpp")}
                       </span>
@@ -216,7 +210,7 @@ export default function ProfilePage() {
                     <p className="text-sm">Debug Mode: {request.debug ? "Enabled" : "Disabled"}</p>
                   </div>
                   <Button
-                    onClick={() => handleRequestAgain(requestToInsertRequest(request))}
+                    onClick={() => handleRequestAgain(insertRequestToRequestFormInput(request))}
                     size="sm"
                   >
                     <Send className="h-4 w-4 mr-2" />
