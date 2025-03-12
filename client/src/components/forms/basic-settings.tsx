@@ -65,15 +65,7 @@ export function BasicSettings({ form }: BasicSettingsProps) {
               <FormItem>
                 <FormLabel>{label}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={placeholder}
-                    value={
-                      typeof field.value === "string" || typeof field.value === "number"
-                        ? field.value
-                        : "test"
-                    }
-                  />
+                  <Input {...field} placeholder={placeholder} />
                 </FormControl>
                 <FormDescription>Enter comma-separated values</FormDescription>
                 <FormMessage />
