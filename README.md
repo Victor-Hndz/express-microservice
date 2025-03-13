@@ -1,15 +1,115 @@
 # Geospatial Data Request System
 
-A full-stack web application built with Express.js and React for managing geospatial and meteorological data requests.
+A sophisticated NestJS microservice implementing Domain-Driven Design (DDD) with hexagonal architecture, focused on creating a robust geospatial and meteorological data request management system.
 
-## Technology Stack
+## Table of Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [Project Structure](#project-structure)
+- [Authentication](#authentication)
+- [Development](#development)
+- [Contributing](#contributing)
 
-- **Frontend**: React with TypeScript, TailwindCSS, shadcn/ui components
+## Overview
+
+The Geospatial Data Request System is a full-stack web application designed to manage and process geospatial and meteorological data requests. It provides a robust interface for users to submit, track, and manage their data requests while implementing best practices in software architecture and design.
+
+### Key Features
+- User authentication and authorization
+- Geospatial data request management
+- Request history tracking
+- API documentation with Swagger
+- Type-safe development with TypeScript
+- Clean architecture implementation
+
+## Architecture
+
+The application follows a hexagonal architecture pattern with clear separation of concerns:
+
+### Layers
+1. **Domain Layer**
+   - Core business logic
+   - Domain entities and value objects
+   - Domain services and interfaces
+
+2. **Application Layer**
+   - Use cases and application services
+   - Input/Output ports
+   - DTOs and mappers
+
+3. **Infrastructure Layer**
+   - Database implementations
+   - External service adapters
+   - Framework-specific code
+
+### Technology Stack
+- **Frontend**: React 18 with TypeScript
 - **Backend**: Express.js with TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **State Management**: TanStack Query (React Query)
-- **Form Handling**: React Hook Form with Zod validation
+- **API Documentation**: Swagger/OpenAPI
 - **Authentication**: Passport.js with session-based auth
+- **Form Handling**: React Hook Form with Zod validation
+- **State Management**: TanStack Query
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 13+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone [repository-url]
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Set up environment variables
+```bash
+# Create .env file
+cp .env.example .env
+
+# Required variables:
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+SESSION_SECRET="your-session-secret"
+```
+
+4. Start the development server
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5000`
+
+## API Documentation
+
+API documentation is available at `/api-docs` when the server is running. The documentation is generated using OpenAPI/Swagger specifications.
+
+### Core Endpoints
+
+#### Authentication
+- `POST /api/register` - Create new user account
+- `POST /api/login` - User login
+- `POST /api/logout` - User logout
+
+#### User Management
+- `GET /api/user` - Get current user profile
+- `PATCH /api/user` - Update user profile
+- `DELETE /api/user` - Delete user account
+
+#### Request Management
+- `POST /api/requests` - Submit new request
+- `GET /api/requests` - Get user's request history
+
 
 ## Project Structure
 
@@ -18,94 +118,67 @@ A full-stack web application built with Express.js and React for managing geospa
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
 │   │   ├── hooks/         # Custom React hooks
-│   │   ├── lib/           # Utility functions and configurations
+│   │   ├── lib/           # Utility functions
 │   │   ├── pages/         # Page components
-│   │   └── types/         # TypeScript type definitions
+│   │   └── types/         # TypeScript types
 ├── server/
-│   ├── routes.ts          # Express routes
-│   ├── storage.ts         # Database operations
-│   ├── auth.ts           # Authentication setup
+│   ├── routes.ts          # API routes
+│   ├── storage.ts         # Data access layer
+│   ├── auth.ts           # Authentication logic
 │   └── db.ts             # Database configuration
 └── shared/
-    └── schema/           # Shared type definitions and schemas
+    └── schema/           # Shared types and schemas
 ```
 
-## Features
+## Authentication
 
-- User authentication (login/register)
-- Geospatial data request form with:
-  - Variable selection (Geopotential, Temperature)
-  - Time range specification
-  - Area coordinates
-  - Processing options
-  - Parallelization settings
-- Request history tracking
-- Form validation and error handling
-- Responsive design
+The application uses session-based authentication with Passport.js:
 
-## Setup and Installation
+- Sessions are stored in PostgreSQL
+- Passwords are hashed using scrypt
+- Protected routes require authentication
+- Session management includes CSRF protection
 
-1. Install dependencies:
+## Development
+
+### Code Style
+- ESLint for code linting
+- Prettier for code formatting
+- TypeScript strict mode enabled
+
+### Testing
 ```bash
-npm install
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
-2. Start the development server:
+### Database Migrations
 ```bash
-npm run dev
+# Generate migration
+npm run db:generate
+
+# Apply migrations
+npm run db:push
 ```
-
-This will start both the Express backend and React frontend in development mode.
-
-## Components
-
-### Form Components
-
-- **BasicSettings**: Handles variable selection and basic parameters
-- **MultiSelectField**: Reusable dropdown with multi-select functionality
-- **Request Form**: Main form component with validation and submission logic
-
-### Authentication
-
-- Login/Register functionality
-- Protected routes
-- Session management
-- User profile management
-
-## API Endpoints
-
-### Authentication
-- `POST /api/register` - Create new user account
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
-- `GET /api/user` - Get current user info
-
-### Requests
-- `POST /api/requests` - Submit new request
-- `GET /api/requests` - Get user's request history
-
-## Environment Variables
-
-The following environment variables are required:
-
-- `DATABASE_URL`: PostgreSQL connection string
-- `SESSION_SECRET`: Secret for session management
 
 ## Contributing
 
-1. Write clean, maintainable code
-2. Follow the existing project structure
-3. Test thoroughly before submitting changes
-4. Keep dependencies up to date
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## Development Workflow
-
-1. Make code changes
-2. Run tests if applicable
-3. Start development server
-4. Test changes locally
-5. Commit and push changes
+### Development Guidelines
+- Write clean, maintainable code
+- Follow the existing architecture
+- Add tests for new features
+- Update documentation as needed
+- Follow the commit message convention
 
 ## License
 
-MIT License
+MIT License - see LICENSE file for details
