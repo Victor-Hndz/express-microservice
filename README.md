@@ -1,10 +1,10 @@
 # Geospatial Data Request System
 
-A sophisticated NestJS microservice implementing Domain-Driven Design (DDD) with hexagonal architecture, focused on creating a robust geospatial and meteorological data request management system.
+A full-stack web application built with Express.js and React, focused on managing geospatial and meteorological data requests efficiently and securely.
 
 ## Table of Contents
 - [Overview](#overview)
-- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [API Documentation](#api-documentation)
@@ -15,44 +15,31 @@ A sophisticated NestJS microservice implementing Domain-Driven Design (DDD) with
 
 ## Overview
 
-The Geospatial Data Request System is a full-stack web application designed to manage and process geospatial and meteorological data requests. It provides a robust interface for users to submit, track, and manage their data requests while implementing best practices in software architecture and design.
+The Geospatial Data Request System is a modern web application that enables users to submit, track, and manage geospatial and meteorological data requests. Built with a focus on type safety and clean architecture, it provides a robust platform for handling complex data requirements.
 
 ### Key Features
 - User authentication and authorization
-- Geospatial data request management
-- Request history tracking
+- Geospatial data request submission and tracking
+- Request history with duplicate detection
 - API documentation with Swagger
 - Type-safe development with TypeScript
-- Clean architecture implementation
+- Comprehensive error handling
 
-## Architecture
+## Technology Stack
 
-The application follows a hexagonal architecture pattern with clear separation of concerns:
-
-### Layers
-1. **Domain Layer**
-   - Core business logic
-   - Domain entities and value objects
-   - Domain services and interfaces
-
-2. **Application Layer**
-   - Use cases and application services
-   - Input/Output ports
-   - DTOs and mappers
-
-3. **Infrastructure Layer**
-   - Database implementations
-   - External service adapters
-   - Framework-specific code
-
-### Technology Stack
-- **Frontend**: React 18 with TypeScript
-- **Backend**: Express.js with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **API Documentation**: Swagger/OpenAPI
-- **Authentication**: Passport.js with session-based auth
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **State Management**: TanStack Query (React Query)
 - **Form Handling**: React Hook Form with Zod validation
-- **State Management**: TanStack Query
+- **UI Components**: shadcn/ui + Tailwind CSS
+- **Routing**: wouter
+
+### Backend
+- **Server**: Express.js with TypeScript
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Passport.js with session-based auth
+- **API Documentation**: Express JSDoc Swagger
+- **Session Store**: PostgreSQL session store
 
 ## Getting Started
 
@@ -110,7 +97,6 @@ API documentation is available at `/api-docs` when the server is running. The do
 - `POST /api/requests` - Submit new request
 - `GET /api/requests` - Get user's request history
 
-
 ## Project Structure
 
 ```
@@ -132,52 +118,46 @@ API documentation is available at `/api-docs` when the server is running. The do
 
 ## Authentication
 
-The application uses session-based authentication with Passport.js:
+The application implements secure session-based authentication:
 
-- Sessions are stored in PostgreSQL
-- Passwords are hashed using scrypt
-- Protected routes require authentication
-- Session management includes CSRF protection
+- Session data stored in PostgreSQL
+- Password hashing with scrypt
+- Protected routes with authentication middleware
+- CSRF protection
+- Secure session configuration
 
 ## Development
 
-### Code Style
+### Code Style and Quality
 - ESLint for code linting
 - Prettier for code formatting
 - TypeScript strict mode enabled
+- Comprehensive error handling
 
-### Testing
+### Database Management
 ```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Database Migrations
-```bash
-# Generate migration
-npm run db:generate
-
-# Apply migrations
+# Push schema changes
 npm run db:push
 ```
+
+### Type Safety
+- Shared types between frontend and backend
+- Zod schemas for runtime validation
+- Drizzle ORM for type-safe database queries
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Make your changes
+4. Submit a pull request
 
 ### Development Guidelines
 - Write clean, maintainable code
-- Follow the existing architecture
+- Follow existing patterns and conventions
 - Add tests for new features
 - Update documentation as needed
-- Follow the commit message convention
+- Use provided tools and components
 
 ## License
 
