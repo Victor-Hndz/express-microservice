@@ -10,17 +10,9 @@ import {
 } from "@/components/ui/form";
 import { type RequestFormInput } from "@shared/types/RequestFormInput";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-} from "@/components/ui/select";
-import { VariableEnum } from "@shared/enums/requests.enums";
-import { Input } from "@/components/ui/input";
 import { InputFieldsProps } from "@shared/consts/inputFields";
 import { useRequestForm } from "@/hooks/use-request-form";
+import { DynamicFormField } from "./dynamic-form-field";
 
 const RequestForm = () => {
   const { form, handleSubmit, resetForm, isSubmitting } = useRequestForm();
@@ -29,45 +21,24 @@ const RequestForm = () => {
     <Form {...form}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="variableName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Variable</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a variable..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={VariableEnum.Geopotential.toString()}>
-                      {VariableEnum.Geopotential}
-                    </SelectItem>
-                    <SelectItem value={VariableEnum.Temperature.toString()}>
-                      {VariableEnum.Temperature}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <div className="grid gap-4 md:grid-cols-2">
-            {InputFieldsProps.map(({ name, label, placeholder }) => (
+            {InputFieldsProps.map((fieldDef) => (
               <FormField
-                key={name}
+                key={fieldDef.name}
                 control={form.control}
-                name={name as keyof RequestFormInput}
+                name={fieldDef.name as keyof RequestFormInput}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{label}</FormLabel>
+                    <FormLabel>
+                      {fieldDef.label}
+                      {fieldDef.optional ? "" : " *"}
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={placeholder} value={field.value ?? ""} />
+                      <DynamicFormField field={field} fieldDef={fieldDef} />
                     </FormControl>
-                    <FormDescription>Enter comma-separated values</FormDescription>
+                    {fieldDef.description && (
+                      <FormDescription>{fieldDef.description}</FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
