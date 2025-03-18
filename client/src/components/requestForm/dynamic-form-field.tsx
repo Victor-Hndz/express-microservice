@@ -30,7 +30,7 @@ export const DynamicFormField = ({ field, fieldDef }: DynamicFormFieldProps) => 
       );
     case "select":
       return (
-        <Select onValueChange={field.onChange} value={field.value as string}>
+        <Select onValueChange={field.onChange} value={(field.value as string) || ""}>
           <SelectTrigger>
             <SelectValue placeholder={fieldDef.placeholder} />
           </SelectTrigger>
@@ -43,28 +43,31 @@ export const DynamicFormField = ({ field, fieldDef }: DynamicFormFieldProps) => 
           </SelectContent>
         </Select>
       );
-    case "multiselect":
-      // A basic implementation - you may want to use a more sophisticated component
+    case "multiselect": {
+      let selectedValues: string[] = [];
+      if (field.value) {
+        if (typeof field.value === "string") {
+          selectedValues = field.value.split(",").filter(Boolean);
+        }
+      }
+
       return (
         <div className="flex flex-wrap gap-2 p-2 border rounded-md">
           {fieldDef.options?.map((option) => (
             <div key={option.value} className="flex items-center space-x-2">
               <Checkbox
                 id={`${field.name}-${option.value}`}
-                checked={((field.value as string) || "").includes(option.value)}
+                checked={selectedValues.includes(option.value)}
                 onCheckedChange={(checked) => {
-                  const values = ((field.value as string) || "").split(",").filter(Boolean);
+                  let newValues = [...selectedValues];
                   if (checked) {
-                    if (!values.includes(option.value)) {
-                      values.push(option.value);
+                    if (!newValues.includes(option.value)) {
+                      newValues.push(option.value);
                     }
                   } else {
-                    const index = values.indexOf(option.value);
-                    if (index !== -1) {
-                      values.splice(index, 1);
-                    }
+                    newValues = newValues.filter((val) => val !== option.value);
                   }
-                  field.onChange(values.join(","));
+                  field.onChange(newValues.join(","));
                 }}
               />
               <label htmlFor={`${field.name}-${option.value}`}>{option.label}</label>
@@ -72,6 +75,7 @@ export const DynamicFormField = ({ field, fieldDef }: DynamicFormFieldProps) => 
           ))}
         </div>
       );
+    }
     case "checkbox":
       return (
         <Checkbox
