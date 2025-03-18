@@ -43,6 +43,8 @@ export function useRequestForm() {
 
   const form = useForm<RequestFormInput>({
     resolver: zodResolver(insertRequestSchema),
+    defaultValues: DEFAULT_VALUES,
+    mode: "onChange",
   });
 
   const submitMutation = useMutation({
@@ -109,9 +111,15 @@ export function useRequestForm() {
     }
   }, [isFullArea, form]);
 
-  const handleSubmit = form.handleSubmit((data) => {
-    submitMutation.mutate(requestFormInputToInsertRequest(data));
-  });
+  const handleSubmit = form.handleSubmit(
+    (data) => {
+      console.log("Form data:", data);
+      submitMutation.mutate(requestFormInputToInsertRequest(data));
+    },
+    (errors) => {
+      console.log("Validation errors:", errors);
+    }
+  );
 
   const resetForm = () => {
     form.reset(DEFAULT_VALUES);

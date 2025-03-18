@@ -1,5 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
-import { RefreshCw, Send } from "lucide-react";
+import { RefreshCw, Send, Loader2 } from "lucide-react";
 import {
   Form,
   FormItem,
@@ -21,22 +20,14 @@ import {
 import { VariableEnum } from "@shared/enums/requests.enums";
 import { Input } from "@/components/ui/input";
 import { InputFieldsProps } from "@shared/consts/inputFields";
+import { useRequestForm } from "@/hooks/use-request-form";
 
 const RequestForm = () => {
-  const form = useForm<RequestFormInput>();
-  const { handleSubmit } = form;
-
-  const onSubmit: SubmitHandler<RequestFormInput> = (data) => {
-    console.log(data);
-  };
-
-  const resetForm = () => {
-    form.reset();
-  };
+  const { form, handleSubmit, resetForm, isSubmitting } = useRequestForm();
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <FormField
             control={form.control}
@@ -85,11 +76,15 @@ const RequestForm = () => {
           </div>
         </div>
         <div className="flex gap-4">
-          <Button type="submit" className="flex-1">
-            <Send className="h-4 w-4 mr-2" />
-            Submit Request
+          <Button type="submit" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4 mr-2" />
+            )}
+            {isSubmitting ? "Submitting..." : "Submit Request"}
           </Button>
-          <Button type="button" variant="outline" onClick={resetForm}>
+          <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Clear Form
           </Button>
