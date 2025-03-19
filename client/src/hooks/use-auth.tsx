@@ -2,7 +2,8 @@ import { createContext, ReactNode, useContext, useMemo } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
 import { User, InsertUser } from "@shared/schema/schema";
 import { useToast } from "@/hooks/use-toast";
-import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { authService, LoginData, UpdateUserData } from "@/services/auth";
 
 type AuthContextType = {
   user: User | null;
@@ -14,9 +15,6 @@ type AuthContextType = {
   updateProfileMutation: UseMutationResult<User, Error, UpdateUserData>;
   deleteProfileMutation: UseMutationResult<void, Error, void>;
 };
-
-type LoginData = Pick<InsertUser, "username" | "password">;
-type UpdateUserData = Pick<InsertUser, "username">;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -32,10 +30,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
-    },
+    mutationFn: authService.login,
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
     },
@@ -49,10 +44,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
-    },
+    mutationFn: authService.register,
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
     },
