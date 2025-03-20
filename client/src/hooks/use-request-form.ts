@@ -3,37 +3,14 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { InsertRequest } from "@shared/schema/schema";
-import { RequestFormInput, requestFormInputToInsertRequest } from "@shared/types/RequestFormInput";
-import { apiRequest } from "@/services/api";
+import {
+  RequestFormInput,
+  requestFormInputToInsertRequest,
+  requestFormSchema,
+} from "@shared/types/RequestFormInput";
 import { useToast } from "@/hooks/use-toast";
-
-// Form-specific validation schema that works with string values
-const requestFormSchema = z.object({
-  variableName: z.string().min(1, "Variable name is required"),
-  pressureLevels: z.string().min(1, "At least one pressure level is required"),
-  years: z.string().min(1, "At least one year is required"),
-  months: z.string().min(1, "At least one month is required"),
-  days: z.string().min(1, "At least one day is required"),
-  hours: z.string().min(1, "At least one hour is required"),
-  areaCovered: z.string().min(1, "Area covered is required"),
-  mapTypes: z.string().min(1, "At least one map type is required"),
-  mapRanges: z.string().min(1, "At least one map range is required"),
-  mapLevels: z.string().optional(),
-  fileFormat: z.string().min(1, "File format is required"),
-  outDir: z.string().optional(),
-  tracking: z.string().optional(),
-  debug: z.string().optional(),
-  noCompile: z.string().optional(),
-  noExecute: z.string().optional(),
-  noMaps: z.string().optional(),
-  animation: z.string().optional(),
-  omp: z.string().optional(),
-  mpi: z.string().optional(),
-  nThreads: z.string().optional(),
-  nProces: z.string().optional(),
-});
+import { requestsService } from "@/services/requests";
 
 const DEFAULT_VALUES: RequestFormInput = {
   variableName: "",
@@ -42,12 +19,12 @@ const DEFAULT_VALUES: RequestFormInput = {
   months: "",
   days: "",
   hours: "",
-  areaCovered: "",
+  areaCovered: "90,-180,-90,180",
   mapTypes: "",
   mapRanges: "",
-  mapLevels: "",
-  fileFormat: "",
-  outDir: "",
+  mapLevels: "20",
+  fileFormat: "SVG",
+  outDir: "/out",
   tracking: "false",
   debug: "false",
   noCompile: "false",
@@ -75,8 +52,16 @@ export function useRequestForm() {
 
   const submitMutation = useMutation({
     mutationFn: async (data: InsertRequest) => {
-      const res = await apiRequest<{ message: string }>("POST", "/api/requests", data);
-      return res.message;
+      console.log("Submitting request: ", data);
+
+      // Validate essential fields before sending
+      if (!data.pressureLevels || data.pressureLevels.length === 0) {
+        throw new Error("At least one pressure level is required");
+      }
+
+      // Use the service function instead of direct apiRequest
+      const response = await requestsService.create(data);
+      return response.id ? "Request created successfully" : "Success";
     },
     onSuccess: () => {
       toast({
@@ -89,9 +74,16 @@ export function useRequestForm() {
       setIsFullArea(false);
     },
     onError: (error: Error) => {
+      console.error("Request failed:", error);
+
+      // Provide more detailed error feedback
+      const errorMessage = error.message.includes("400:")
+        ? "Validation error: Please check all required fields"
+        : error.message;
+
       toast({
         title: "Request failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -137,9 +129,18 @@ export function useRequestForm() {
           throw new Error("Area must have exactly 4 values");
         }
 
+        // Additional validation for pressureLevels
+        if (!data.pressureLevels || data.pressureLevels.trim() === "") {
+          throw new Error("At least one pressure level is required");
+        }
+
         // Convert the form data to InsertRequest format
         const requestData = requestFormInputToInsertRequest(data);
+
+        // Extra logging for debugging
         console.log("Form data converted:", requestData);
+        console.log("Pressure levels:", requestData.pressureLevels);
+
         submitMutation.mutate(requestData);
       } catch (error) {
         console.error("Conversion error:", error);

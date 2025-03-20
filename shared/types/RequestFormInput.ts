@@ -1,5 +1,6 @@
 import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
 import { Request, InsertRequest } from "@shared/schema/schema";
+import { z } from "zod";
 
 export type RequestFormInput = {
   variableName: string;
@@ -25,6 +26,31 @@ export type RequestFormInput = {
   nThreads?: string;
   nProces?: string;
 };
+
+export const requestFormSchema = z.object({
+  variableName: z.string().min(1, "Variable name is required"),
+  pressureLevels: z.string().min(1, "At least one pressure level is required"),
+  years: z.string().min(1, "At least one year is required"),
+  months: z.string().min(1, "At least one month is required"),
+  days: z.string().min(1, "At least one day is required"),
+  hours: z.string().min(1, "At least one hour is required"),
+  areaCovered: z.string().min(1, "Area covered is required"),
+  mapTypes: z.string().min(1, "At least one map type is required"),
+  mapRanges: z.string().min(1, "At least one map range is required"),
+  mapLevels: z.string().optional(),
+  fileFormat: z.string().optional(),
+  outDir: z.string().optional(),
+  tracking: z.string().optional(),
+  debug: z.string().optional(),
+  noCompile: z.string().optional(),
+  noExecute: z.string().optional(),
+  noMaps: z.string().optional(),
+  animation: z.string().optional(),
+  omp: z.string().optional(),
+  mpi: z.string().optional(),
+  nThreads: z.string().optional(),
+  nProces: z.string().optional(),
+});
 
 export interface AreaSettings {
   isFullArea: boolean;

@@ -3,14 +3,6 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { VariableEnum, TypesEnum, RangesEnum, FormatEnum } from "@shared/enums/requests.enums";
 import { stringToNumberArray, stringToStringArray } from "@shared/utils/stringConvertion";
-import {
-  simplePressureLevelsOptions,
-  advancedPressureLevelsOptions,
-} from "@shared/consts/pressureLevelsOptions";
-
-function isSubsetOf(array: number[], set: Set<number>): boolean {
-  return array.every((val) => set.has(val));
-}
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -104,7 +96,8 @@ export const insertRequestSchema = createInsertSchema(requests).extend({
   mapLevels: z.preprocess(stringToNumberArray, z.number().array().optional().default([20])),
   fileFormat: z
     .enum([FormatEnum.PNG, FormatEnum.JPG, FormatEnum.JPEG, FormatEnum.PDF, FormatEnum.SVG])
-    .optional().default(FormatEnum.SVG),
+    .optional()
+    .default(FormatEnum.SVG),
   outDir: z.string().optional(),
   tracking: z.boolean().optional(),
   debug: z.boolean().optional(),
