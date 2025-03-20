@@ -3,11 +3,37 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRequestSchema, InsertRequest } from "@shared/schema/schema";
+import { z } from "zod";
+import { InsertRequest } from "@shared/schema/schema";
 import { RequestFormInput, requestFormInputToInsertRequest } from "@shared/types/RequestFormInput";
-import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
 import { apiRequest } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+
+// Form-specific validation schema that works with string values
+const requestFormSchema = z.object({
+  variableName: z.string().min(1, "Variable name is required"),
+  pressureLevels: z.string().min(1, "At least one pressure level is required"),
+  years: z.string().min(1, "At least one year is required"),
+  months: z.string().min(1, "At least one month is required"),
+  days: z.string().min(1, "At least one day is required"),
+  hours: z.string().min(1, "At least one hour is required"),
+  areaCovered: z.string().min(1, "Area covered is required"),
+  mapTypes: z.string().min(1, "At least one map type is required"),
+  mapRanges: z.string().min(1, "At least one map range is required"),
+  mapLevels: z.string().optional(),
+  fileFormat: z.string().min(1, "File format is required"),
+  outDir: z.string().optional(),
+  tracking: z.string().optional(),
+  debug: z.string().optional(),
+  noCompile: z.string().optional(),
+  noExecute: z.string().optional(),
+  noMaps: z.string().optional(),
+  animation: z.string().optional(),
+  omp: z.string().optional(),
+  mpi: z.string().optional(),
+  nThreads: z.string().optional(),
+  nProces: z.string().optional(),
+});
 
 const DEFAULT_VALUES: RequestFormInput = {
   variableName: "",
@@ -42,7 +68,7 @@ export function useRequestForm() {
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
 
   const form = useForm<RequestFormInput>({
-    resolver: zodResolver(insertRequestSchema),
+    resolver: zodResolver(requestFormSchema),
     defaultValues: DEFAULT_VALUES,
     mode: "onChange",
   });
@@ -74,32 +100,24 @@ export function useRequestForm() {
   // Parse URL parameters for pre-filling form
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1]);
+    if (params.size === 0) return;
 
-    form.reset({
-      ...DEFAULT_VALUES,
-      variableName: params.get("variableName") as VariableEnum,
-      pressureLevels: params.get("pressureLevels") as string,
-      years: params.get("years") as string,
-      months: params.get("months") as string,
-      days: params.get("days") as string,
-      hours: params.get("hours") as string,
-      areaCovered: params.get("areaCovered") as string,
-      mapTypes: params.get("mapTypes") as TypesEnum,
-      mapRanges: params.get("mapRanges") as RangesEnum,
-      mapLevels: params.get("mapLevels") as string,
-      fileFormat: params.get("fileFormat") as FormatEnum,
-      outDir: params.get("outDir") as string,
-      tracking: params.get("tracking") as string,
-      debug: params.get("debug") as string,
-      noCompile: params.get("noCompile") as string,
-      noExecute: params.get("noExecute") as string,
-      noMaps: params.get("noMaps") as string,
-      animation: params.get("animation") as string,
-      omp: params.get("omp") as string,
-      mpi: params.get("mpi") as string,
-      nThreads: params.get("nThreads") as string,
-      nProces: params.get("nProces") as string,
-    });
+    const formValues = { ...DEFAULT_VALUES };
+
+    // Process each parameter if it exists
+    for (const key of Object.keys(DEFAULT_VALUES) as Array<keyof RequestFormInput>) {
+      const value = params.get(key);
+      if (value !== null) {
+        formValues[key] = value;
+      }
+    }
+
+    form.reset(formValues);
+
+    // Update related states
+    setIsFullArea(formValues.areaCovered === "90,-180,-90,180");
+    if (formValues.mapTypes) setSelectedTypes(formValues.mapTypes.split(","));
+    if (formValues.mapRanges) setSelectedRanges(formValues.mapRanges.split(","));
   }, [location, form]);
 
   // Effect for handling full area checkbox
@@ -107,14 +125,30 @@ export function useRequestForm() {
     if (isFullArea) {
       form.setValue("areaCovered", "90,-180,-90,180");
     } else {
-      form.setValue("areaCovered", "0,0,0,0");
+      form.setValue("areaCovered", "");
     }
   }, [isFullArea, form]);
 
   const handleSubmit = form.handleSubmit(
     (data) => {
-      console.log("Form data:", data);
-      submitMutation.mutate(requestFormInputToInsertRequest(data));
+      try {
+        // Ensure areaCovered has exactly 4 values if not empty
+        if (data.areaCovered && data.areaCovered.split(",").length !== 4) {
+          throw new Error("Area must have exactly 4 values");
+        }
+
+        // Convert the form data to InsertRequest format
+        const requestData = requestFormInputToInsertRequest(data);
+        console.log("Form data converted:", requestData);
+        submitMutation.mutate(requestData);
+      } catch (error) {
+        console.error("Conversion error:", error);
+        toast({
+          title: "Validation Error",
+          description: error instanceof Error ? error.message : "Invalid form data",
+          variant: "destructive",
+        });
+      }
     },
     (errors) => {
       console.log("Validation errors:", errors);

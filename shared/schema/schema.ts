@@ -29,7 +29,7 @@ export const requests = pgTable("requests", {
   areaCovered: jsonb("areaCovered").$type<number[]>().notNull(),
   mapTypes: jsonb("mapTypes").$type<string[]>().notNull(),
   mapRanges: jsonb("mapRanges").$type<string[]>().notNull(),
-  mapLevels: jsonb("mapLevels").$type<number[]>().notNull(),
+  mapLevels: jsonb("mapLevels").$type<number[]>(),
   fileFormat: text("fileFormat"),
   outDir: text("outDir"),
   tracking: boolean("tracking"),
@@ -55,19 +55,18 @@ export const insertRequestSchema = createInsertSchema(requests).extend({
   variableName: z.enum([VariableEnum.Geopotential, VariableEnum.Temperature], {
     required_error: "Variable name is required",
   }),
-  pressureLevels: z
-    .preprocess(
-      stringToNumberArray,
-      z.number().array().min(1, "At least one pressure level is required")
-    )
-    .refine(
-      (arr) =>
-        isSubsetOf(arr, simplePressureLevelsOptions) ||
-        isSubsetOf(arr, advancedPressureLevelsOptions),
-      {
-        message: "pressureLevels must only contain valid values (simple or advanced sets).",
-      }
-    ),
+  pressureLevels: z.preprocess(
+    stringToNumberArray,
+    z.number().array().min(1, "At least one pressure level is required")
+  ),
+  // .refine(
+  //   (arr) =>
+  //     isSubsetOf(arr, simplePressureLevelsOptions) ||
+  //     isSubsetOf(arr, advancedPressureLevelsOptions),
+  //   {
+  //     message: "pressureLevels must only contain valid values (simple or advanced sets).",
+  //   }
+  // ),
   years: z.preprocess(
     stringToNumberArray,
     z.number().array().min(1, "At least one year is required")
@@ -105,7 +104,7 @@ export const insertRequestSchema = createInsertSchema(requests).extend({
   mapLevels: z.preprocess(stringToNumberArray, z.number().array().optional().default([20])),
   fileFormat: z
     .enum([FormatEnum.PNG, FormatEnum.JPG, FormatEnum.JPEG, FormatEnum.PDF, FormatEnum.SVG])
-    .optional(),
+    .optional().default(FormatEnum.SVG),
   outDir: z.string().optional(),
   tracking: z.boolean().optional(),
   debug: z.boolean().optional(),

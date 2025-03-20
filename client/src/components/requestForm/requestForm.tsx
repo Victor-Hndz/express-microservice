@@ -21,6 +21,10 @@ const fieldGroups = [
     fields: ["variableName", "pressureLevels", "years", "months", "days", "hours"],
   },
   {
+    title: "Area Configuration",
+    fields: ["areaCovered"],
+  },
+  {
     title: "Map Configuration",
     fields: ["mapTypes", "mapRanges", "mapLevels"],
   },
@@ -39,7 +43,8 @@ const fieldGroups = [
 ];
 
 const RequestForm = () => {
-  const { form, handleSubmit, resetForm, isSubmitting } = useRequestForm();
+  const { form, handleSubmit, resetForm, isSubmitting, isFullArea, setIsFullArea } =
+    useRequestForm();
 
   // Create a map for quick field lookup
   const fieldsMap = InputFieldsProps.reduce(
@@ -60,6 +65,43 @@ const RequestForm = () => {
               {group.fields.map((fieldName) => {
                 const fieldDef = fieldsMap[fieldName];
                 if (!fieldDef) return null;
+
+                if (fieldName === "areaCovered") {
+                  return (
+                    <div key={fieldName} className="md:col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="areaCovered"
+                        render={({ field }) => (
+                          <FormItem className="space-y-2">
+                            <FormLabel>Area Coverage *</FormLabel>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <input
+                                type="checkbox"
+                                id="fullArea"
+                                checked={isFullArea}
+                                onChange={() => setIsFullArea(!isFullArea)}
+                                className="h-4 w-4"
+                              />
+                              <label htmlFor="fullArea" className="text-sm">
+                                Use full area (90,-180,-90,180)
+                              </label>
+                            </div>
+                            {!isFullArea && (
+                              <FormControl>
+                                <DynamicFormField field={field} fieldDef={fieldDef} />
+                              </FormControl>
+                            )}
+                            <FormDescription>
+                              Enter 4 comma-separated values: north, west, south, east
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  );
+                }
 
                 return (
                   <FormField

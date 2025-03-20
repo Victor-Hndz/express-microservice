@@ -95,6 +95,14 @@ export const InputFieldsProps: InputFieldProps[] = [
   },
   // Map configuration fields
   {
+    name: "areaCovered",
+    label: "Area Covered",
+    placeholder: "e.g., 90,-180,-90,180",
+    optional: false,
+    inputType: "text",
+    description: "Enter 4 comma-separated values: north, west, south, east",
+  },
+  {
     name: "mapTypes",
     label: "Map Types",
     placeholder: "Select map types",
