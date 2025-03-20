@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRequestSchema, InsertRequest } from "@shared/schema/schema";
 import { RequestFormInput, requestFormInputToInsertRequest } from "@shared/types/RequestFormInput";
 import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 const DEFAULT_VALUES: RequestFormInput = {
@@ -49,8 +49,8 @@ export function useRequestForm() {
 
   const submitMutation = useMutation({
     mutationFn: async (data: InsertRequest) => {
-      const res = await apiRequest("POST", "/api/requests", data);
-      return res.json();
+      const res = await apiRequest<{ message: string }>("POST", "/api/requests", data);
+      return res.message;
     },
     onSuccess: () => {
       toast({

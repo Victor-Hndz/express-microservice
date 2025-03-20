@@ -4,6 +4,7 @@ import { User, InsertUser } from "@shared/schema/schema";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { authService, LoginData, UpdateUserData } from "@/services/auth";
+import { apiRequest, getQueryFn } from "@/services/api";
 
 type AuthContextType = {
   user: User | null;
@@ -75,8 +76,8 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UpdateUserData) => {
-      const res = await apiRequest("PATCH", "/api/user", data);
-      return await res.json();
+      const res = await apiRequest<User>("PATCH", "/api/user", data);
+      return res;
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
