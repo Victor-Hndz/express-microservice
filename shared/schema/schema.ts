@@ -2,14 +2,13 @@ import { pgTable, serial, text, boolean, integer, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { VariableEnum, TypesEnum, RangesEnum, FormatEnum } from "@shared/enums/requests.enums";
-import { stringToNumberArray, stringToStringArray } from "@shared/utils/stringConvertion";
 import {
-  simplePressureLevelsOptions,
   advancedPressureLevelsOptions,
+  simplePressureLevelsOptions,
 } from "@shared/consts/pressureLevelsOptions";
 
-function isSubsetOf(array: number[], set: Set<number>): boolean {
-  return array.every((val) => set.has(val));
+function isSubsetOf(arr: number[], set: Set<number>): boolean {
+  return arr.every((item) => set.has(item));
 }
 
 export const users = pgTable("users", {
@@ -29,7 +28,7 @@ export const requests = pgTable("requests", {
   areaCovered: jsonb("areaCovered").$type<number[]>().notNull(),
   mapTypes: jsonb("mapTypes").$type<string[]>().notNull(),
   mapRanges: jsonb("mapRanges").$type<string[]>().notNull(),
-  mapLevels: jsonb("mapLevels").$type<number[]>().notNull(),
+  mapLevels: jsonb("mapLevels").$type<number[]>(),
   fileFormat: text("fileFormat"),
   outDir: text("outDir"),
   tracking: boolean("tracking"),
@@ -56,10 +55,9 @@ export const insertRequestSchema = createInsertSchema(requests).extend({
     required_error: "Variable name is required",
   }),
   pressureLevels: z
-    .preprocess(
-      stringToNumberArray,
-      z.number().array().min(1, "At least one pressure level is required")
-    )
+    .number()
+    .array()
+    .min(1, "At least one pressure level is required")
     .refine(
       (arr) =>
         isSubsetOf(arr, simplePressureLevelsOptions) ||
@@ -68,44 +66,28 @@ export const insertRequestSchema = createInsertSchema(requests).extend({
         message: "pressureLevels must only contain valid values (simple or advanced sets).",
       }
     ),
-  years: z.preprocess(
-    stringToNumberArray,
-    z.number().array().min(1, "At least one year is required")
-  ),
-  months: z.preprocess(
-    stringToNumberArray,
-    z.number().array().min(1, "At least one month is required")
-  ),
-  days: z.preprocess(
-    stringToNumberArray,
-    z.number().array().min(1, "At least one day is required")
-  ),
-  hours: z.preprocess(
-    stringToNumberArray,
-    z.number().array().min(1, "At least one hour is required")
-  ),
-  areaCovered: z.preprocess(
-    stringToNumberArray,
-    z.number().array().length(4, "Area must have exactly 4 values").default([90, -180, -90, 180])
-  ),
-  mapTypes: z.preprocess(
-    stringToStringArray,
-    z
-      .enum([TypesEnum.Cont, TypesEnum.Disp, TypesEnum.Comb, TypesEnum.Forms])
-      .array()
-      .min(1, "At least one type is required")
-  ),
-  mapRanges: z.preprocess(
-    stringToStringArray,
-    z
-      .enum([RangesEnum.Max, RangesEnum.Min, RangesEnum.Both, RangesEnum.Comb])
-      .array()
-      .min(1, "At least one range is required")
-  ),
-  mapLevels: z.preprocess(stringToNumberArray, z.number().array().optional().default([20])),
+  years: z.number().array().min(1, "At least one year is required"),
+  months: z.number().array().min(1, "At least one month is required"),
+  days: z.number().array().min(1, "At least one day is required"),
+  hours: z.number().array().min(1, "At least one hour is required"),
+  areaCovered: z
+    .number()
+    .array()
+    .length(4, "Area must have exactly 4 values")
+    .default([90, -180, -90, 180]),
+  mapTypes: z
+    .enum([TypesEnum.Cont, TypesEnum.Disp, TypesEnum.Comb, TypesEnum.Forms])
+    .array()
+    .min(1, "At least one type is required"),
+  mapRanges: z
+    .enum([RangesEnum.Max, RangesEnum.Min, RangesEnum.Both, RangesEnum.Comb])
+    .array()
+    .min(1, "At least one range is required"),
+  mapLevels: z.number().array().optional().default([20]),
   fileFormat: z
     .enum([FormatEnum.PNG, FormatEnum.JPG, FormatEnum.JPEG, FormatEnum.PDF, FormatEnum.SVG])
-    .optional(),
+    .optional()
+    .default(FormatEnum.SVG),
   outDir: z.string().optional(),
   tracking: z.boolean().optional(),
   debug: z.boolean().optional(),

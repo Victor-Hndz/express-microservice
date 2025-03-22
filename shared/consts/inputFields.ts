@@ -1,4 +1,4 @@
-import { FormatEnum, RangesEnum, TypesEnum } from "@shared/enums/requests.enums";
+import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
 
 export type InputFieldOption = {
   value: string;
@@ -15,12 +15,33 @@ export type InputFieldProps = {
   description?: string;
 };
 
+enum labelCasingEnum {
+  lowerCase = "lowerCase",
+  upperCase = "upperCase",
+  capitalize = "capitalize",
+}
+
 // Helper function to convert enum to options
-const enumToOptions = (enumObject: Record<string, string>): InputFieldOption[] => {
-  return Object.values(enumObject).map((value) => ({
-    value,
-    label: value.charAt(0).toUpperCase() + value.slice(1),
-  }));
+const enumToOptions = (
+  enumObject: Record<string, string>,
+  labelCasing: labelCasingEnum
+): InputFieldOption[] => {
+  return Object.values(enumObject).map((value) => {
+    let label: string;
+    switch (labelCasing) {
+      case labelCasingEnum.lowerCase:
+        label = value.toLowerCase();
+        break;
+      case labelCasingEnum.upperCase:
+        label = value.toUpperCase();
+        break;
+      case labelCasingEnum.capitalize:
+      default:
+        label = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        break;
+    }
+    return { value, label };
+  });
 };
 
 export const InputFieldsProps: InputFieldProps[] = [
@@ -30,10 +51,7 @@ export const InputFieldsProps: InputFieldProps[] = [
     placeholder: "Choose a variable...",
     optional: false,
     inputType: "select",
-    options: [
-      { value: "geopotential", label: "Geopotential" },
-      { value: "temperature", label: "Temperature" },
-    ],
+    options: enumToOptions(VariableEnum, labelCasingEnum.capitalize),
   },
   {
     name: "pressureLevels",
@@ -77,12 +95,20 @@ export const InputFieldsProps: InputFieldProps[] = [
   },
   // Map configuration fields
   {
+    name: "areaCovered",
+    label: "Area Covered",
+    placeholder: "e.g., 90,-180,-90,180",
+    optional: false,
+    inputType: "text",
+    description: "Enter 4 comma-separated values: north, west, south, east",
+  },
+  {
     name: "mapTypes",
     label: "Map Types",
     placeholder: "Select map types",
     optional: false,
     inputType: "multiselect",
-    options: enumToOptions(TypesEnum),
+    options: enumToOptions(TypesEnum, labelCasingEnum.lowerCase),
     description: "Select one or more map types",
   },
   {
@@ -91,7 +117,7 @@ export const InputFieldsProps: InputFieldProps[] = [
     placeholder: "Select map ranges",
     optional: false,
     inputType: "multiselect",
-    options: enumToOptions(RangesEnum),
+    options: enumToOptions(RangesEnum, labelCasingEnum.lowerCase),
     description: "Select one or more map range types",
   },
   {
@@ -109,7 +135,7 @@ export const InputFieldsProps: InputFieldProps[] = [
     placeholder: "Select output format",
     optional: false,
     inputType: "select",
-    options: enumToOptions(FormatEnum),
+    options: enumToOptions(FormatEnum, labelCasingEnum.upperCase),
     description: "Format for output files",
   },
   {

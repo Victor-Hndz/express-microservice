@@ -3,11 +3,14 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRequestSchema, InsertRequest } from "@shared/schema/schema";
-import { RequestFormInput, requestFormInputToInsertRequest } from "@shared/types/RequestFormInput";
-import { FormatEnum, RangesEnum, TypesEnum, VariableEnum } from "@shared/enums/requests.enums";
-import { apiRequest } from "@/lib/queryClient";
+import { InsertRequest } from "@shared/schema/schema";
+import {
+  RequestFormInput,
+  requestFormInputToInsertRequest,
+  requestFormSchema,
+} from "@shared/types/RequestFormInput";
 import { useToast } from "@/hooks/use-toast";
+import { requestsService } from "@/services/requests";
 
 const DEFAULT_VALUES: RequestFormInput = {
   variableName: "",
@@ -16,12 +19,12 @@ const DEFAULT_VALUES: RequestFormInput = {
   months: "",
   days: "",
   hours: "",
-  areaCovered: "",
+  areaCovered: "90,-180,-90,180",
   mapTypes: "",
   mapRanges: "",
-  mapLevels: "",
-  fileFormat: "",
-  outDir: "",
+  mapLevels: "20",
+  fileFormat: "SVG",
+  outDir: "/out",
   tracking: "false",
   debug: "false",
   noCompile: "false",
@@ -42,15 +45,23 @@ export function useRequestForm() {
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
 
   const form = useForm<RequestFormInput>({
-    resolver: zodResolver(insertRequestSchema),
+    resolver: zodResolver(requestFormSchema),
     defaultValues: DEFAULT_VALUES,
     mode: "onChange",
   });
 
   const submitMutation = useMutation({
     mutationFn: async (data: InsertRequest) => {
-      const res = await apiRequest("POST", "/api/requests", data);
-      return res.json();
+      console.log("Submitting request: ", data);
+
+      // Validate essential fields before sending
+      if (!data.pressureLevels || data.pressureLevels.length === 0) {
+        throw new Error("At least one pressure level is required");
+      }
+
+      // Use the service function instead of direct apiRequest
+      const response = await requestsService.create(data);
+      return response.id ? "Request created successfully" : "Success";
     },
     onSuccess: () => {
       toast({
@@ -63,9 +74,16 @@ export function useRequestForm() {
       setIsFullArea(false);
     },
     onError: (error: Error) => {
+      console.error("Request failed:", error);
+
+      // Provide more detailed error feedback
+      const errorMessage = error.message.includes("400:")
+        ? "Validation error: Please check all required fields"
+        : error.message;
+
       toast({
         title: "Request failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -74,32 +92,24 @@ export function useRequestForm() {
   // Parse URL parameters for pre-filling form
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1]);
+    if (params.size === 0) return;
 
-    form.reset({
-      ...DEFAULT_VALUES,
-      variableName: params.get("variableName") as VariableEnum,
-      pressureLevels: params.get("pressureLevels") as string,
-      years: params.get("years") as string,
-      months: params.get("months") as string,
-      days: params.get("days") as string,
-      hours: params.get("hours") as string,
-      areaCovered: params.get("areaCovered") as string,
-      mapTypes: params.get("mapTypes") as TypesEnum,
-      mapRanges: params.get("mapRanges") as RangesEnum,
-      mapLevels: params.get("mapLevels") as string,
-      fileFormat: params.get("fileFormat") as FormatEnum,
-      outDir: params.get("outDir") as string,
-      tracking: params.get("tracking") as string,
-      debug: params.get("debug") as string,
-      noCompile: params.get("noCompile") as string,
-      noExecute: params.get("noExecute") as string,
-      noMaps: params.get("noMaps") as string,
-      animation: params.get("animation") as string,
-      omp: params.get("omp") as string,
-      mpi: params.get("mpi") as string,
-      nThreads: params.get("nThreads") as string,
-      nProces: params.get("nProces") as string,
-    });
+    const formValues = { ...DEFAULT_VALUES };
+
+    // Process each parameter if it exists
+    for (const key of Object.keys(DEFAULT_VALUES) as Array<keyof RequestFormInput>) {
+      const value = params.get(key);
+      if (value !== null) {
+        formValues[key] = value;
+      }
+    }
+
+    form.reset(formValues);
+
+    // Update related states
+    setIsFullArea(formValues.areaCovered === "90,-180,-90,180");
+    if (formValues.mapTypes) setSelectedTypes(formValues.mapTypes.split(","));
+    if (formValues.mapRanges) setSelectedRanges(formValues.mapRanges.split(","));
   }, [location, form]);
 
   // Effect for handling full area checkbox
@@ -107,14 +117,39 @@ export function useRequestForm() {
     if (isFullArea) {
       form.setValue("areaCovered", "90,-180,-90,180");
     } else {
-      form.setValue("areaCovered", "0,0,0,0");
+      form.setValue("areaCovered", "");
     }
   }, [isFullArea, form]);
 
   const handleSubmit = form.handleSubmit(
     (data) => {
-      console.log("Form data:", data);
-      submitMutation.mutate(requestFormInputToInsertRequest(data));
+      try {
+        // Ensure areaCovered has exactly 4 values if not empty
+        if (data.areaCovered && data.areaCovered.split(",").length !== 4) {
+          throw new Error("Area must have exactly 4 values");
+        }
+
+        // Additional validation for pressureLevels
+        if (!data.pressureLevels || data.pressureLevels.trim() === "") {
+          throw new Error("At least one pressure level is required");
+        }
+
+        // Convert the form data to InsertRequest format
+        const requestData = requestFormInputToInsertRequest(data);
+
+        // Extra logging for debugging
+        console.log("Form data converted:", requestData);
+        console.log("Pressure levels:", requestData.pressureLevels);
+
+        submitMutation.mutate(requestData);
+      } catch (error) {
+        console.error("Conversion error:", error);
+        toast({
+          title: "Validation Error",
+          description: error instanceof Error ? error.message : "Invalid form data",
+          variant: "destructive",
+        });
+      }
     },
     (errors) => {
       console.log("Validation errors:", errors);
